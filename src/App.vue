@@ -4,7 +4,7 @@ import ProgressIndicator from "./components/ProgressIndicator.vue";
 import FirstScreenHeader from "./components/FirstScreenHeader.vue";
 import FirstScreenFooter from "./components/FirstScreenFooter.vue";
 import RadioButton from "./components/RadioButton.vue"
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, nextTick } from 'vue';
 import CheckboxButton from "./components/CheckboxButton.vue";
 import jsonData from './assets/mobile-expert/phone-models.json'
 import { createConditionalExpression } from "@vue/compiler-core";
@@ -13,8 +13,8 @@ import { createConditionalExpression } from "@vue/compiler-core";
 const allPhonesData: any = jsonData
 const phoneNames = Object.keys(allPhonesData)
 const currentPhoneData: any = ref({});
-const currentPhoneImg = ref("");
-let defaultColor: any = ""
+// const currentPhoneImg = ref("");
+// let defaultColor: any = ""
 
 const isPhoneModelFound = computed(() => {
 
@@ -24,7 +24,7 @@ const isPhoneModelFound = computed(() => {
     currentPhoneData.value = allPhonesData[currentPhoneName]
 
     let defaultColor: any = Object.keys(currentPhoneData.value.custom_Colors)[0]
-    fields.value.color.checked = defaultColor
+    fields.value.color.value = defaultColor
 
 
     return true
@@ -61,95 +61,88 @@ const fields: any = ref({
   color: {
     label: "culoarea",
     type: "radio",
-    checked: "",
+    value: "",
     validations: [
       {
         message: "Alege o culoare",
-        test: (checked: string) => checked
+        test: (value: string) => value
       }
     ]
   },
   storageCapacity: {
     label: "Capacitate",
     type: "radio",
-    checked: "",
     value: "",
     validations: [
       {
         message: "Alege o varianta - stocare",
-        test: (checked: string) => checked
+        test: (value: string) => value
       }
     ]
   },
   networkRestrictions: {
     label: "Este blocat in reatea?",
     type: "radio",
-    checked: "",
     value: "",
     validations: [
       {
         message: "Alege o varianta - retea",
-        test: (checked: string) => checked
+        test: (value: string) => value
       }
     ]
   },
   displayState: {
     label: "Starea ecranului",
     type: "radio",
-    checked: "",
     value: "",
     validations: [
       {
         message: "Alege o varianta - display",
-        test: (checked: string) => checked
+        test: (value: string) => value
       }
     ]
   },
   backCaseState: {
     label: "Starea spatelui telefonului",
     type: "radio",
-    checked: "",
     value: "",
     validations: [
       {
         message: "Alege o varianta - caracasa spate",
-        test: (checked: string) => checked
+        test: (value: string) => value
       }
     ]
   },
   lateralCaseState: {
     label: "Starea lateralelor",
     type: "radio",
-    checked: "",
     value: "",
     validations: [
       {
         message: "Alege cel putin o varianta - lateral",
-        test: (checked: string) => checked
+        test: (value: string) => value
       }
     ]
   },
   otherProblems: {
     label: "Alte probleme",
     type: "checkbox",
-    checked: [""],
-    value: "",
+    value: [""],
     validations: [
       {
         message: "Alege cel putin o varianta",
-        test: (checked: string) => checked
+        test: (value: string) => value
       }
     ]
   },
   accesories: {
     label: "Accesorii disponibile",
     type: "checkbox",
-    checked: [""],
-    value: "",
+    value: [""],
     validations: [
       {
         message: "Alege cel putin o varianta",
-        test: (checked: string) => checked
+        test: (value: string) => value
       }
     ]
   },
@@ -210,9 +203,7 @@ const currentFields: any = computed(() => {
 })
 
 const phonePictureUrl = computed(() => {
-  //  console.log(currentPhoneData.value.custom_Colors[fields.value.color.checked].phoneImg)
-
-  let selectedColor = currentPhoneData.value.custom_Colors[fields.value.color.checked].phoneImg
+  let selectedColor = currentPhoneData.value.custom_Colors[fields.value.color.value].phoneImg
   return '/src/assets/img/phones-img/' + selectedColor
 })
 
@@ -242,61 +233,58 @@ function validateField(fieldKey: number) {
   const field = fields.value[fieldKey];
   // run through each of the fields validation tests
 
-  
+
   field.validations.forEach((validation: { test: (arg0: any) => any; message: any; }) => {
-    console.log(validation.test(field.value))
     if (!validation.test(field.value)) {
       invalids.value[fieldKey] = validation.message;
-      // console.log(validation.message)
     }
   });
 }
 
 function submit() {
-    // if form not valid don't submit
-    validate();
-    if (isInvalid.value) return;
+  // if form not valid don't submit
+  validate()
+  if (isInvalid.value) return;
 
-    // submit on valid form
-    console.log("doing submit", fields.value);
-    submitted.value = true;
-  }
+  // submit on valid form
+  console.log("doing submit", fields.value);
+  submitted.value = true;
+}
 
-function updateProblemsCheckbox(value: any) {
+function updateProblemsCheckbox(checked: any) {
   // const value = value;
-  // console.log(values)
 
   // if( value === "Fara probleme") {
-  //   return fields.value.otherProblems.checked = ["", "Fara probleme"]
+  //   return fields.value.otherProblems.value = ["", "Fara probleme"]
   // }
 
-  if (fields.value.otherProblems.checked.includes(value)) {
-    return fields.value.otherProblems.checked = fields.value.otherProblems.checked.filter((v: string) => v !== value);
+  if (fields.value.otherProblems.value.includes(checked)) {
+    return fields.value.otherProblems.value = fields.value.otherProblems.value.filter((v: string) => v !== checked);
   }
 
-  return fields.value.otherProblems.checked = [...fields.value.otherProblems.checked, value]
+  return fields.value.otherProblems.value = [...fields.value.otherProblems.value, checked]
 }
 
 
-function updateAccesoriesCheckbox(value: any) {
+function updateAccesoriesCheckbox(checked: any) {
   // const value = value;
-  // console.log(values)
 
   // if( value === "Fara probleme") {
-  //   return fields.value.otherProblems.checked = ["", "Fara probleme"]
+  //   return fields.value.otherProblems.value = ["", "Fara probleme"]
   // }
 
-  if (fields.value.accesories.checked.includes(value)) {
-    return fields.value.accesories.checked = fields.value.accesories.checked.filter((v: string) => v !== value);
+  if (fields.value.accesories.value.includes(checked)) {
+    return fields.value.accesories.value = fields.value.accesories.value.filter((v: string) => v !== checked);
   }
 
-  return fields.value.accesories.checked = [...fields.value.accesories.checked, value]
+  return fields.value.accesories.value = [...fields.value.accesories.value, checked]
 }
 
 function nextStep(values: any) {
   // if validate
+  
   validate();
-    if (isInvalid.value) return;
+  if (isInvalid.value) return;
 
   if (isLastStep.value) {
     console.log('Done: ', JSON.stringify(values, null, 2));
@@ -367,8 +355,8 @@ function prevStep() {
 
               <div class="flex">
                 <!-- currentPhoneData -->
-                <RadioButton v-for="(color, key, i) in currentPhoneData.custom_Colors" v-model="fields.color.checked"
-                  radioGroupName="color" :radioBtnName="key.toString()">
+                <RadioButton @change="validate()" v-for="(color, key, i) in currentPhoneData.custom_Colors"
+                  v-model="fields.color.value" radioGroupName="color" :radioBtnName="key.toString()">
                   <div class="rounded-full relative h-8 w-8" :style="{ backgroundColor: color.hex }">
                     <div class="rounded-full absolute h-8 w-8  bg-gradient-to-t from-black/20 via-black/10 to-black/0">
                     </div>
@@ -376,70 +364,58 @@ function prevStep() {
                   </div>
                 </RadioButton>
 
-                <!-- {{ currentPhoneData.custom_Colors }} -->
-
-
-                <!-- <RadioButton v-model="fields.color.checked" radioGroupName="color" radioBtnName="red"
-                  :colorClasses="'from-red-500 to-red-800'">
-                  <div class="rounded-full h-8 w-8 bg-gradient-to-b from-red-500 to-red-800"></div>
-                </RadioButton>
-
-
-                <RadioButton v-model="fields.color.checked" radioGroupName="color" radioBtnName="blue">
-                  <div class="rounded-full h-8 w-8 bg-gradient-to-b from-blue-500 to-blue-800"></div>
-                </RadioButton>
-
-                <RadioButton v-model="fields.color.checked" radioGroupName="color" radioBtnName="green">
-                  <div class="rounded-full h-8 w-8 bg-gradient-to-b from-green-300 to-green-500"></div>
-                </RadioButton> -->
-
               </div>
+              <section v-if="invalids.color" class="font-bold">{{ invalids.color }}</section>
             </section>
             <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
               <h3 class="font-bold text-xl mb-4">Capacitate</h3>
               <div class="flex">
 
-                <RadioButton v-model="fields.storageCapacity.checked" radioGroupName="storageCapacity"
-                  radioBtnName="64gb">
+                <RadioButton @change="validate()" v-model="fields.storageCapacity.value"
+                  radioGroupName="storageCapacity" radioBtnName="64gb">
                   <span>64GB</span>
                 </RadioButton>
 
-                <RadioButton v-model="fields.storageCapacity.checked" radioGroupName="storageCapacity"
-                  radioBtnName="128gb">
+                <RadioButton @change="validate()" v-model="fields.storageCapacity.value"
+                  radioGroupName="storageCapacity" radioBtnName="128gb">
                   <span>128GB</span>
                 </RadioButton>
 
-                <RadioButton v-model="fields.storageCapacity.checked" radioGroupName="storageCapacity"
-                  radioBtnName="256gb">
+                <RadioButton @change="validate()" v-model="fields.storageCapacity.value"
+                  radioGroupName="storageCapacity" radioBtnName="256gb">
                   <span>256GB</span>
                 </RadioButton>
 
               </div>
+              <section v-if="invalids.storageCapacity" class="font-bold">{{ invalids.storageCapacity }}</section>
             </section>
             <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
               <h3 class="font-bold text-xl mb-4">Este blocat in reatea?</h3>
               <div class="flex">
 
-                <RadioButton v-model="fields.networkRestrictions.checked" radioGroupName="networkRestrictions"
-                  radioBtnName="deblocat">
+                <RadioButton @change="validate()" v-model="fields.networkRestrictions.value"
+                  radioGroupName="networkRestrictions" radioBtnName="deblocat">
                   <span>Deblocat</span>
                 </RadioButton>
 
-                <RadioButton v-model="fields.networkRestrictions.checked" radioGroupName="networkRestrictions"
-                  radioBtnName="orange">
+                <RadioButton @change="validate()" v-model="fields.networkRestrictions.value"
+                  radioGroupName="networkRestrictions" radioBtnName="orange">
                   <span>Orange</span>
                 </RadioButton>
 
-                <RadioButton v-model="fields.networkRestrictions.checked" radioGroupName="networkRestrictions"
-                  radioBtnName="vodafone">
+                <RadioButton @change="validate()" v-model="fields.networkRestrictions.value"
+                  radioGroupName="networkRestrictions" radioBtnName="vodafone">
                   <span>Vodafone</span>
                 </RadioButton>
 
-                <RadioButton v-model="fields.networkRestrictions.checked" radioGroupName="networkRestrictions"
-                  radioBtnName="operatorStrain">
+                <RadioButton @change="validate()" v-model="fields.networkRestrictions.value"
+                  radioGroupName="networkRestrictions" radioBtnName="operatorStrain">
                   <span>Oparator strain</span>
                 </RadioButton>
               </div>
+              <section v-if="invalids.networkRestrictions" class="font-bold">{{ invalids.networkRestrictions }}
+              </section>
+
             </section>
           </div>
         </div>
@@ -451,7 +427,7 @@ function prevStep() {
 
           <div class="grid grid-cols-2 gap-2">
 
-            <RadioButton v-model="fields.displayState.checked" radioGroupName="displayState" radioBtnName="4/4"
+            <RadioButton v-model="fields.displayState.value" radioGroupName="displayState" radioBtnName="4/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Ca nou</span>
@@ -459,7 +435,7 @@ function prevStep() {
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.displayState.checked" radioGroupName="displayState" radioBtnName="3/4"
+            <RadioButton v-model="fields.displayState.value" radioGroupName="displayState" radioBtnName="3/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Foarte bun</span>
@@ -467,7 +443,7 @@ function prevStep() {
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.displayState.checked" radioGroupName="displayState" radioBtnName="2/4"
+            <RadioButton v-model="fields.displayState.value" radioGroupName="displayState" radioBtnName="2/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Bun</span>
@@ -475,7 +451,7 @@ function prevStep() {
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.displayState.checked" radioGroupName="displayState" radioBtnName="1/4"
+            <RadioButton v-model="fields.displayState.value" radioGroupName="displayState" radioBtnName="1/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Uzat: spart, deteriorat</span>
@@ -483,15 +459,9 @@ function prevStep() {
               </div>
             </RadioButton>
 
-            <!-- <RadioButton v-model="fields.displayState.checked" radioGroupName="displayState" radioBtnName="1/5"
-              :colorClasses="'from-red-500 to-red-800'">
-              <div class="flex flex-col">
-                <span class="font-bold">Uzat: spart, ingalbenit</span>
-                <span class="text-slate-500">Ecran spart sau fisurat. Display ingalbenit sau cu urme.</span>
-              </div>
-            </RadioButton> -->
-
           </div>
+          <section v-if="invalids.displayState" class="font-bold">{{ invalids.displayState }}
+              </section>
         </section>
       </template>
 
@@ -501,28 +471,28 @@ function prevStep() {
 
           <div class="grid grid-cols-2 gap-2">
 
-            <RadioButton v-model="fields.backCaseState.checked" radioGroupName="backCaseState" radioBtnName="4/4">
+            <RadioButton v-model="fields.backCaseState.value" radioGroupName="backCaseState" radioBtnName="4/4">
               <div class="flex flex-col">
                 <span class="font-bold">Ca nou</span>
                 <span class="text-slate-500">Stare perfectă fără defecte, zgârieturi, fisuri</span>
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.backCaseState.checked" radioGroupName="backCaseState" radioBtnName="3/4">
+            <RadioButton v-model="fields.backCaseState.value" radioGroupName="backCaseState" radioBtnName="3/4">
               <div class="flex flex-col">
                 <span class="font-bold">Foarte bun</span>
                 <span class="text-slate-500">Câteva zgârieturi superficiale, fără fisuri</span>
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.backCaseState.checked" radioGroupName="backCaseState" radioBtnName="2/4">
+            <RadioButton v-model="fields.backCaseState.value" radioGroupName="backCaseState" radioBtnName="2/4">
               <div class="flex flex-col">
                 <span class="font-bold">Bun</span>
                 <span class="text-slate-500">Zgârieturi evidente, folosire intensă, fără fisuri, urme</span>
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.backCaseState.checked" radioGroupName="backCaseState" radioBtnName="1/4"
+            <RadioButton v-model="fields.backCaseState.value" radioGroupName="backCaseState" radioBtnName="1/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Uzat: spart, deteriorat</span>
@@ -531,6 +501,8 @@ function prevStep() {
             </RadioButton>
 
           </div>
+          <section v-if="invalids.backCaseState" class="font-bold">{{ invalids.backCaseState }}
+              </section>
         </section>
       </template>
 
@@ -540,7 +512,7 @@ function prevStep() {
 
           <div class="grid grid-cols-2 gap-2">
 
-            <RadioButton v-model="fields.lateralCaseState.checked" radioGroupName="lateralCaseState" radioBtnName="4/4"
+            <RadioButton v-model="fields.lateralCaseState.value" radioGroupName="lateralCaseState" radioBtnName="4/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Ca nou</span>
@@ -548,7 +520,7 @@ function prevStep() {
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.lateralCaseState.checked" radioGroupName="lateralCaseState" radioBtnName="3/4"
+            <RadioButton v-model="fields.lateralCaseState.value" radioGroupName="lateralCaseState" radioBtnName="3/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Foarte bun</span>
@@ -556,7 +528,7 @@ function prevStep() {
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.lateralCaseState.checked" radioGroupName="lateralCaseState" radioBtnName="2/4"
+            <RadioButton v-model="fields.lateralCaseState.value" radioGroupName="lateralCaseState" radioBtnName="2/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Bun</span>
@@ -564,7 +536,7 @@ function prevStep() {
               </div>
             </RadioButton>
 
-            <RadioButton v-model="fields.lateralCaseState.checked" radioGroupName="lateralCaseState" radioBtnName="1/4"
+            <RadioButton v-model="fields.lateralCaseState.value" radioGroupName="lateralCaseState" radioBtnName="1/4"
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Uzat: spart, deteriorat</span>
@@ -574,6 +546,8 @@ function prevStep() {
 
 
           </div>
+          <section v-if="invalids.lateralCaseState" class="font-bold">{{ invalids.lateralCaseState }}
+              </section>
         </section>
       </template>
 
@@ -645,6 +619,9 @@ function prevStep() {
 
 
           </div>
+
+          <section v-if="invalids.otherProblems" class="font-bold">{{ invalids.otherProblems }}
+              </section>
         </section>
       </template>
 
@@ -715,20 +692,29 @@ function prevStep() {
             <h5 class="text-[3em] font-bold justify-self-center text-green-500 mb-6">1135 lei</h5>
 
             <label hiden for="name"></label>
-            <input id="name" type="text" class="border-slate-300 border rounded px-4 py-2 mb-3"
-              placeholder="Nume si prenume">
+            <input v-model="fields.name.value" id="name" type="text" class="border-slate-300 border rounded px-4 py-2 mb-3"
+              placeholder="Nume si prenume" >
+
+              <section v-if="invalids.name" class="font-bold">{{ invalids.name }}
+              </section>
 
 
 
             <label hiden for="email"></label>
-            <input id="name" type="text" class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Email">
+            <input v-model="fields.email.value" id="email" type="email" class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Email">
+
+            <section v-if="invalids.email" class="font-bold">{{ invalids.email }}
+              </section>
 
 
             <label hiden for="phone"></label>
-            <input id="name" type="text" class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Telefon">
+            <input v-model="fields.phone.value" id="phone" type="number" class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Telefon">
+
+            <section v-if="invalids.phone" class="font-bold">{{ invalids.phone }}
+              </section>
 
             <div class="flex justify-center">
-              <button class="bg-green-600 px-14 py-4 rounded-md text-white font-bold mt-4">Vreau sa fiu
+              <button @click.prevent="submit()" class="bg-green-600 px-14 py-4 rounded-md text-white font-bold mt-4">Vreau sa fiu
                 contactat</button>
             </div>
 
@@ -738,10 +724,11 @@ function prevStep() {
 
 
 
-      <footer @click="validate()" :class="[isLastStep || isFirstStep ? 'justify-center' : 'justify-between']"
+      <footer :class="[isLastStep || isFirstStep ? 'justify-center' : 'justify-between']"
         class="flex flex-row-reverse gap-2 mt-5 w-full">
         <button v-if="!isLastStep" :disabled=!isPhoneModelFound
-          class="bg-blue-100 px-12 py-3 rounded-md  text-blue-500 disabled:opacity-50 font-bold" @click.prevent="nextStep">
+          class="bg-blue-100 px-12 py-3 rounded-md  text-blue-500 disabled:opacity-50 font-bold"
+          @click.prevent="nextStep">
           Next &gt;
         </button>
         <button v-if="!isFirstStep" class="text-neutral-500" @click.prevent="prevStep">
@@ -753,8 +740,8 @@ function prevStep() {
 
     </form>
     <!-- ⚠️db preview  -->
-    <pre>❌{{ Object.values(invalids).filter((key) => key).length }}❌</pre>
     <pre>❌{{ isInvalid }}❌</pre>
+    <pre>❌{{ invalids }}❌</pre>
     <pre>current fields: {{ steps[currentStep] }} 👈</pre>
     <pre>{{ fields }}</pre>
   </div>
