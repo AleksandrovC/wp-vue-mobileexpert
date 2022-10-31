@@ -14,12 +14,12 @@ const allPhonesData: any = jsonData
 const phoneNames = Object.keys(allPhonesData)
 const currentPhoneData: any = ref({});
 const currentPhoneImg = ref("");
-let defaultColor : any = ""
+let defaultColor: any = ""
 
 const isPhoneModelFound = computed(() => {
 
   if (phoneNames.includes(fields.value.phoneModel.value)) {
-    
+
     let currentPhoneName = fields.value.phoneModel.value
     currentPhoneData.value = allPhonesData[currentPhoneName]
 
@@ -38,77 +38,156 @@ const isPhoneModelFound = computed(() => {
 
 })
 
-const fields = ref({
+const isInvalid = computed(() => {
+  return !!Object.values(invalids.value).filter((key) => key).length;
+
+})
+
+const invalids: any = ref({})
+
+const fields: any = ref({
   phoneModel: {
     label: "model telefon",
     type: "search",
     placeholder: "Introdu modelul telefonului tau - Exemplu: S7 Edge",
     value: "",
+    validations: [
+      {
+        message: "Modelul telefonului este invalid",
+        test: (value: string) => value
+      }
+    ]
   },
   color: {
     label: "culoarea",
     type: "radio",
     checked: "",
+    validations: [
+      {
+        message: "Alege o culoare",
+        test: (checked: string) => checked
+      }
+    ]
   },
   storageCapacity: {
     label: "Capacitate",
     type: "radio",
     checked: "",
     value: "",
+    validations: [
+      {
+        message: "Alege o varianta - stocare",
+        test: (checked: string) => checked
+      }
+    ]
   },
   networkRestrictions: {
     label: "Este blocat in reatea?",
     type: "radio",
     checked: "",
     value: "",
+    validations: [
+      {
+        message: "Alege o varianta - retea",
+        test: (checked: string) => checked
+      }
+    ]
   },
   displayState: {
     label: "Starea ecranului",
     type: "radio",
     checked: "",
     value: "",
+    validations: [
+      {
+        message: "Alege o varianta - display",
+        test: (checked: string) => checked
+      }
+    ]
   },
   backCaseState: {
     label: "Starea spatelui telefonului",
     type: "radio",
     checked: "",
     value: "",
+    validations: [
+      {
+        message: "Alege o varianta - caracasa spate",
+        test: (checked: string) => checked
+      }
+    ]
   },
   lateralCaseState: {
     label: "Starea lateralelor",
     type: "radio",
     checked: "",
     value: "",
+    validations: [
+      {
+        message: "Alege cel putin o varianta - lateral",
+        test: (checked: string) => checked
+      }
+    ]
   },
   otherProblems: {
     label: "Alte probleme",
     type: "checkbox",
     checked: [""],
     value: "",
+    validations: [
+      {
+        message: "Alege cel putin o varianta",
+        test: (checked: string) => checked
+      }
+    ]
   },
   accesories: {
     label: "Accesorii disponibile",
     type: "checkbox",
     checked: [""],
     value: "",
+    validations: [
+      {
+        message: "Alege cel putin o varianta",
+        test: (checked: string) => checked
+      }
+    ]
   },
   name: {
     label: "Nume si prenume",
     type: "text",
     placeholder: "Nume si prenume",
     value: "",
+    validations: [
+      {
+        message: "Completeaza numele",
+        test: (value: string) => value
+      }
+    ]
   },
   email: {
     label: "Email",
     type: "email",
     placeholder: "Email",
     value: "",
+    validations: [
+      {
+        message: "Completeaza Email",
+        test: (value: string) => value
+      }
+    ]
   },
   phone: {
     label: "Telefon",
     type: "tel",
     placeholder: "Telefon",
     value: "",
+    validations: [
+      {
+        message: "Completeaza numarul de telefon",
+        test: (value: string) => value
+      }
+    ]
   },
 })
 
@@ -124,6 +203,64 @@ const steps = [
 ]
 
 const currentStep = ref(0)
+const submitted = ref(false)
+
+const currentFields: any = computed(() => {
+  return steps[currentStep.value]
+})
+
+const phonePictureUrl = computed(() => {
+  //  console.log(currentPhoneData.value.custom_Colors[fields.value.color.checked].phoneImg)
+
+  let selectedColor = currentPhoneData.value.custom_Colors[fields.value.color.checked].phoneImg
+  return '/src/assets/img/phones-img/' + selectedColor
+})
+
+const totalSteps = computed(() => {
+  return steps.length;
+})
+
+const isFirstStep = computed(() => {
+  return currentStep.value === 0
+});
+
+const isLastStep = computed(() => {
+  return currentStep.value === totalSteps.value - 1;
+});
+
+function validate() {
+  invalids.value = {};
+  // validates all the fields on the current page
+
+  currentFields.value.forEach((key: number) => {
+    validateField(key);
+  });
+}
+
+function validateField(fieldKey: number) {
+  invalids.value[fieldKey] = false;
+  const field = fields.value[fieldKey];
+  // run through each of the fields validation tests
+
+  
+  field.validations.forEach((validation: { test: (arg0: any) => any; message: any; }) => {
+    console.log(validation.test(field.value))
+    if (!validation.test(field.value)) {
+      invalids.value[fieldKey] = validation.message;
+      // console.log(validation.message)
+    }
+  });
+}
+
+function submit() {
+    // if form not valid don't submit
+    validate();
+    if (isInvalid.value) return;
+
+    // submit on valid form
+    console.log("doing submit", fields.value);
+    submitted.value = true;
+  }
 
 function updateProblemsCheckbox(value: any) {
   // const value = value;
@@ -157,6 +294,10 @@ function updateAccesoriesCheckbox(value: any) {
 }
 
 function nextStep(values: any) {
+  // if validate
+  validate();
+    if (isInvalid.value) return;
+
   if (isLastStep.value) {
     console.log('Done: ', JSON.stringify(values, null, 2));
     return;
@@ -171,38 +312,6 @@ function prevStep() {
   currentStep.value--;
 }
 
-const phonePictureUrl = computed(() => {
-  // getter
-
-    // console.log("GETTER")
-    console.log(currentPhoneData.value.custom_Colors[fields.value.color.checked].phoneImg)
-
-    let selectedColor = currentPhoneData.value.custom_Colors[fields.value.color.checked].phoneImg
-  return '/src/assets/img/phones-img/' + selectedColor 
-
-
-  // setter
-  // set(newValue) {
-  //   console.log("SETTER")
-
-  //   // let selectedColor: any = Object.values(currentPhoneData.value.custom_Colors)[0]
-  //   return '/src/assets/img/phones-img/' + newValue
-  //   // console.log(currentPhoneData.value.custom_Colors)
- 
-  // }
-})
-
-const totalSteps = computed(() => {
-  return steps.length;
-})
-
-const isFirstStep = computed(() => {
-  return currentStep.value === 0
-});
-
-const isLastStep = computed(() => {
-  return currentStep.value === totalSteps.value - 1;
-});
 
 
 </script>
@@ -258,9 +367,8 @@ const isLastStep = computed(() => {
 
               <div class="flex">
                 <!-- currentPhoneData -->
-                <RadioButton v-for="(color, key, i) in currentPhoneData.custom_Colors" v-model="fields.color.checked" 
-                  radioGroupName="color" :radioBtnName="key.toString()"
-                  >
+                <RadioButton v-for="(color, key, i) in currentPhoneData.custom_Colors" v-model="fields.color.checked"
+                  radioGroupName="color" :radioBtnName="key.toString()">
                   <div class="rounded-full relative h-8 w-8" :style="{ backgroundColor: color.hex }">
                     <div class="rounded-full absolute h-8 w-8  bg-gradient-to-t from-black/20 via-black/10 to-black/0">
                     </div>
@@ -496,8 +604,7 @@ const isLastStep = computed(() => {
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox"
-              radioBtnName="Probleme camera fata/spate">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="Probleme camera fata/spate">
               <div class="flex flex-col">
                 <span class="font-bold">Probleme cameră față/spate</span>
                 <span class="text-slate-500"></span>
@@ -511,7 +618,8 @@ const isLastStep = computed(() => {
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="Probleme senzor amprenta/Face ID">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox"
+              radioBtnName="Probleme senzor amprenta/Face ID">
               <div class="flex flex-col">
                 <span class="font-bold">Probleme senzor amprenta/Face ID</span>
                 <span class="text-slate-500"></span>
@@ -522,14 +630,15 @@ const isLastStep = computed(() => {
               <div class="flex flex-col">
                 <span class="font-bold">A fost reparat în garanție/contra cost</span>
                 <span class="text-slate-500">A avut o reparatie realizată, schimbat ecran, baterie, etc.
-Dețin fișa de service</span>
+                  Dețin fișa de service</span>
               </div>
             </CheckboxButton>
 
             <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="Alte probleme">
               <div class="flex flex-col">
                 <span class="font-bold">Alte probleme</span>
-                <span class="text-slate-500">Nu pornește, cont iCloud blocat, butoane, porturi nefunctionale, etc.</span>
+                <span class="text-slate-500">Nu pornește, cont iCloud blocat, butoane, porturi nefunctionale,
+                  etc.</span>
               </div>
             </CheckboxButton>
 
@@ -629,10 +738,10 @@ Dețin fișa de service</span>
 
 
 
-      <footer :class="[isLastStep || isFirstStep ? 'justify-center' : 'justify-between']"
+      <footer @click="validate()" :class="[isLastStep || isFirstStep ? 'justify-center' : 'justify-between']"
         class="flex flex-row-reverse gap-2 mt-5 w-full">
         <button v-if="!isLastStep" :disabled=!isPhoneModelFound
-          class="bg-blue-100 px-12 py-3 rounded-md  text-blue-500 disabled:opacity-50 font-bold" @click="nextStep">
+          class="bg-blue-100 px-12 py-3 rounded-md  text-blue-500 disabled:opacity-50 font-bold" @click.prevent="nextStep">
           Next &gt;
         </button>
         <button v-if="!isFirstStep" class="text-neutral-500" @click.prevent="prevStep">
@@ -644,6 +753,9 @@ Dețin fișa de service</span>
 
     </form>
     <!-- ⚠️db preview  -->
+    <pre>❌{{ Object.values(invalids).filter((key) => key).length }}❌</pre>
+    <pre>❌{{ isInvalid }}❌</pre>
+    <pre>current fields: {{ steps[currentStep] }} 👈</pre>
     <pre>{{ fields }}</pre>
   </div>
 </template>
