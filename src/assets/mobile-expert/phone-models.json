@@ -23,33 +23,38 @@
             "128gb": 0,
             "256gb": 200
         },
-        "displayPriceModifiers": {
-            "1/5": -200,
-            "2/5": -150,
-            "3/5": -100,
-            "4/5": 0,
-            "5/5": 40
+        "networkRestrictionsPriceModifiers": {
+            "deblocat": 0,
+            "orange": -50,
+            "vodafone": -50,
+            "operatorStrain": -100
         },
-        "laterlsPriceModifiers": {
-            "1/5": -200,
-            "2/5": -150,
-            "3/5": -100,
-            "4/5": 0,
-            "5/5": 40
+        "displayPriceModifiers": {
+            "1/4": -150,
+            "2/4": -100,
+            "3/4": -40,
+            "4/4": 10
         },
         "backcasePriceModifiers": {
-            "1/5": -200,
-            "2/5": -150,
-            "3/5": -100,
-            "4/5": 0,
-            "5/5": 40
+            "1/4": -150,
+            "2/4": -100,
+            "3/4": -40,
+            "4/4": 10
+        },
+        "laterlsPriceModifiers": {
+            "1/4": -150,
+            "2/4": -100,
+            "3/4": -40,
+            "4/4": 10
         },
         "otherProblemsPriceModifiers": {
-            "noProblem": 0,
+            "noProblems": 0,
             "speakerProblem": -150,
-            "frontCamProblem": -150,
+            "frontCam/BackCamProblem": -150,
+            "batteryProblem": -100,
             "fingerprint/FaceIdProblem": -100,
-            "backCamProblem": -200
+            "wasRepairedBefore": -200,
+            "otherProblems": 0
         },
         "accesoriesPriceModifiers": {
             "produsNou": 100,
