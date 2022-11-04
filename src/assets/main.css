@@ -13,6 +13,10 @@
   font-weight: normal;
 }
 
+[v-cloak] {
+  display: none;
+}
+
 a,
 .green {
   text-decoration: none;

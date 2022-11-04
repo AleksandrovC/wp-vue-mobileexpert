@@ -10,12 +10,13 @@ import jsonData from './assets/mobile-expert/phone-models.json'
 import { createConditionalExpression } from "@vue/compiler-core";
 
 const currentStep = ref(0)
-
 const allPhonesData: any = jsonData
 const phoneNames = Object.keys(allPhonesData)
 const currentPhoneData: any = ref({});
 // const currentPhoneImg = ref("");
+const customerData: any = ref({})
 // let defaultColor: any = ""
+
 
 const isPhoneModelFound = computed(() => {
 
@@ -221,7 +222,7 @@ const isLastStep = computed(() => {
 });
 
 let estimatedValue: any = ref();
-let phoneReview : any = ref()
+let phoneReview: any = ref()
 
 function estimateValue() {
 
@@ -261,9 +262,9 @@ function estimateValue() {
 
   console.log(Object.values(phoneReview.value))
   console.log(Object.keys(phoneReview.value))
-  console.log(Object.values(phoneReview.value).reduce((a: any, b: any) =>  a + b, 0))
+  console.log(Object.values(phoneReview.value).reduce((a: any, b: any) => a + b, 0))
 
-  phoneReview.value["Estimated Price"] = Object.values(phoneReview.value).reduce((a: any, b: any) =>  a + b, 0)
+  phoneReview.value["Estimated Price"] = Object.values(phoneReview.value).reduce((a: any, b: any) => a + b, 0)
 
 
 
@@ -284,9 +285,11 @@ function validate() {
   });
 }
 
-function validateField(fieldKey: number) {
+function validateField(fieldKey: any) {
   invalids.value[fieldKey] = false;
   const field = fields.value[fieldKey];
+
+  console.log(fieldKey)
   // run through each of the fields validation tests
 
 
@@ -303,13 +306,13 @@ function submit() {
   if (isInvalid.value) return;
 
 
-  let customerData = {
+  customerData.value = {
     "name": fields.value.name.value,
-    "telefon" : fields.value.phone.value,
-    "email" : fields.value.email.value
+    "telefon": fields.value.phone.value,
+    "email": fields.value.email.value
   }
   // submit on valid form
-  console.log("doing submit", phoneReview.value, customerData);
+  console.log("doing submit", phoneReview.value, customerData.value);
   submitted.value = true;
 }
 
@@ -323,6 +326,8 @@ function updateProblemsCheckbox(checked: any) {
   if (fields.value.otherProblems.value.includes(checked)) {
     return fields.value.otherProblems.value = fields.value.otherProblems.value.filter((v: string) => v !== checked);
   }
+
+  console.log(fields.value.otherProblems.value)
 
   return fields.value.otherProblems.value = [...fields.value.otherProblems.value, checked]
 }
@@ -374,8 +379,8 @@ function prevStep() {
 
 <template>
   <div id="multi-step-form" class="grid w-full max-w-5xl justify-self-center">
-    <form v-if="!submitted" class="p-10" @submit.prevent="">
-<!-- 
+    <form v-if="!submitted" class="sm:p-10" @submit.prevent="">
+      <!-- 
       <button @click="estimateValue">compute</button>
       <pre>{{ estimatedValue }}</pre> -->
 
@@ -404,10 +409,10 @@ function prevStep() {
       <template v-if="isFirstStep">
         <FirstScreenHeader />
 
-        <span color="text-red-400">{{ isPhoneModelFound }}</span>
+        <!-- <span class="text-red-400">{{ isPhoneModelFound }}</span> -->
         <input class="w-full border rounded-full border-blue-400 px-6 py-2 bg-blue-50"
-          placeholder="Introdu modelul telefonului tau - Exemplu: S7 Edge" type="search"
-          v-model="fields.phoneModel.value" list="data" />
+          :class="{ 'font-bold': isPhoneModelFound }" placeholder="Introdu modelul telefonului tau - Exemplu: S7 Edge"
+          type="search" v-model="fields.phoneModel.value" list="data" />
 
         <datalist v-if="!isPhoneModelFound" id="data">
           <option v-for="phoneName in phoneNames" :value="phoneName"></option>
@@ -417,17 +422,17 @@ function prevStep() {
 
       <template v-if="currentStep === 1">
         <div class="flex flex-col md:flex-row">
-          <div class="mr-10">
+          <div class="mr-10 w-32">
             <img :src="phonePictureUrl" class="h-60" alt="">
           </div>
           <div>
             <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
               <h3 class="font-bold text-xl mb-4">Culoarea telefonului tau</h3>
 
-              <div class="flex">
+              <div class="flex flex-wrap gap-2">
                 <!-- currentPhoneData -->
-                <RadioButton @change="validate()" v-for="(color, key, i) in currentPhoneData.custom_Colors"
-                  v-model="fields.color.value" radioGroupName="color" :radioBtnName="key.toString()">
+                <RadioButton v-for="(color, key, i) in currentPhoneData.custom_Colors" v-model="fields.color.value"
+                  radioGroupName="color" :radioBtnName="key.toString()" @change="validateField('color')">
                   <div class="rounded-full relative h-8 w-8" :style="{ backgroundColor: color.hex }">
                     <div class="rounded-full absolute h-8 w-8  bg-gradient-to-t from-black/20 via-black/10 to-black/0">
                     </div>
@@ -436,55 +441,60 @@ function prevStep() {
                 </RadioButton>
 
               </div>
-              <section v-if="invalids.color" class="font-bold">{{ invalids.color }}</section>
+              <section v-if="invalids.color" class="text-red-500 text-sm">{{ invalids.color }}</section>
             </section>
             <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
-              <h3 class="font-bold text-xl mb-4">Capacitate</h3>
-              <div class="flex">
+              <h3 class="inline-flex font-bold text-xl mb-4">Capacitate</h3>
+              <div
+                class="bg-blue-100 group ml-2 relative inline-flex text-sm  rounded-full text-blue-500 h-6 w-6 items-center justify-center cursor-pointer">
+                ?
+                <span
+                  class="invisible group-hover:visible absolute bg-white text-blue-500 border border-blue-200 text-sm px-2 py-2 rounded-xl z-10 w-72 sm:w-96 sm:-left-12 -left-28 ">iPhone:
+                  Setari
+                  &gt; General &gt; Informatii <br> <br>
+                  Samsung, Huawei sau Xiaomi: Setari &gt; Despre telefon</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
 
-                <RadioButton @change="validate()" v-model="fields.storageCapacity.value"
-                  radioGroupName="storageCapacity" radioBtnName="64gb">
-                  <span>64GB</span>
-                </RadioButton>
 
-                <RadioButton @change="validate()" v-model="fields.storageCapacity.value"
-                  radioGroupName="storageCapacity" radioBtnName="128gb">
-                  <span>128GB</span>
-                </RadioButton>
-
-                <RadioButton @change="validate()" v-model="fields.storageCapacity.value"
-                  radioGroupName="storageCapacity" radioBtnName="256gb">
-                  <span>256GB</span>
+                <RadioButton v-for="(storage, key, i) in currentPhoneData.custom_StoragePriceModifiers"
+                  @change="validateField('storageCapacity')" v-model="fields.storageCapacity.value"
+                  radioGroupName="storageCapacity" :radioBtnName="key.toString()">
+                  <span class="uppercase">{{ key.toString() }}</span>
                 </RadioButton>
 
               </div>
-              <section v-if="invalids.storageCapacity" class="font-bold">{{ invalids.storageCapacity }}</section>
+              <section v-if="invalids.storageCapacity" class="text-red-500 text-sm">{{ invalids.storageCapacity }}
+              </section>
             </section>
             <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
-              <h3 class="font-bold text-xl mb-4">Este blocat in reatea?</h3>
-              <div class="flex">
-
-                <RadioButton @change="validate()" v-model="fields.networkRestrictions.value"
-                  radioGroupName="networkRestrictions" radioBtnName="deblocat">
-                  <span>Deblocat</span>
-                </RadioButton>
-
-                <RadioButton @change="validate()" v-model="fields.networkRestrictions.value"
-                  radioGroupName="networkRestrictions" radioBtnName="orange">
-                  <span>Orange</span>
-                </RadioButton>
-
-                <RadioButton @change="validate()" v-model="fields.networkRestrictions.value"
-                  radioGroupName="networkRestrictions" radioBtnName="vodafone">
-                  <span>Vodafone</span>
-                </RadioButton>
-
-                <RadioButton @change="validate()" v-model="fields.networkRestrictions.value"
-                  radioGroupName="networkRestrictions" radioBtnName="operatorStrain">
-                  <span>Oparator strain</span>
-                </RadioButton>
+              <h3 class="font-bold inline-flex text-xl mb-4">Este blocat in reatea?</h3>
+              <div
+                class="bg-blue-100 group ml-2 relative inline-flex text-sm  rounded-full text-blue-500 h-6 w-6 items-center justify-center cursor-pointer">
+                ?
+                <span
+                  class="invisible group-hover:visible absolute bg-white text-blue-500 border border-blue-200 text-sm px-2 py-2 rounded-xl z-10 w-72 sm:w-96 -top-32 sm:-top-16 -right-14 sm:-left-12 ">
+                  <p class="mb-1">Orange
+                    și Vodafone, blochează unele telefoane în rețeaua operatorului. </p>
+                  <p class="mb-1"> Daca l-ai achiziționat din
+                    magazin: Altex, iStyle EvoMag, eMag , etc. - atunci este deblocat.</p>
+                  <p class="mb-1">Telekom sau Digi nu blochează
+                    telefoanele.</p>
+                </span>
               </div>
-              <section v-if="invalids.networkRestrictions" class="font-bold">{{ invalids.networkRestrictions }}
+              <div class="flex flex-wrap gap-2">
+
+
+
+                <RadioButton v-for="(restrictions, key, i)  in currentPhoneData.networkRestrictionsPriceModifiers"
+                  @change="validateField('networkRestrictions')" v-model="fields.networkRestrictions.value"
+                  radioGroupName="networkRestrictions" :radioBtnName="key.toString()">
+                  <span class="capitalize">{{ key.toString() }}</span>
+                </RadioButton>
+
+              </div>
+              <section v-if="invalids.networkRestrictions" class="text-red-500 text-sm">{{ invalids.networkRestrictions
+              }}
               </section>
 
             </section>
@@ -496,7 +506,7 @@ function prevStep() {
         <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
           <h3 class="font-bold text-xl mb-4">Starea ecranului</h3>
 
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
             <RadioButton v-model="fields.displayState.value" radioGroupName="displayState" radioBtnName="4/4"
               :colorClasses="'from-red-500 to-red-800'">
@@ -531,7 +541,7 @@ function prevStep() {
             </RadioButton>
 
           </div>
-          <section v-if="invalids.displayState" class="font-bold">{{ invalids.displayState }}
+          <section v-if="invalids.displayState" class="text-red-500 text-sm">{{ invalids.displayState }}
           </section>
         </section>
       </template>
@@ -540,7 +550,7 @@ function prevStep() {
         <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
           <h3 class="font-bold text-xl mb-4">Starea spatelui telefonului</h3>
 
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
             <RadioButton v-model="fields.backCaseState.value" radioGroupName="backCaseState" radioBtnName="4/4">
               <div class="flex flex-col">
@@ -572,7 +582,7 @@ function prevStep() {
             </RadioButton>
 
           </div>
-          <section v-if="invalids.backCaseState" class="font-bold">{{ invalids.backCaseState }}
+          <section v-if="invalids.backCaseState" class="text-red-500 text-sm">{{ invalids.backCaseState }}
           </section>
         </section>
       </template>
@@ -581,7 +591,7 @@ function prevStep() {
         <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
           <h3 class="font-bold text-xl mb-4">Starea lateralelor</h3>
 
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
             <RadioButton v-model="fields.lateralCaseState.value" radioGroupName="lateralCaseState" radioBtnName="4/4"
               :colorClasses="'from-red-500 to-red-800'">
@@ -617,7 +627,7 @@ function prevStep() {
 
 
           </div>
-          <section v-if="invalids.lateralCaseState" class="font-bold">{{ invalids.lateralCaseState }}
+          <section v-if="invalids.lateralCaseState" class="text-red-500 text-sm">{{ invalids.lateralCaseState }}
           </section>
         </section>
       </template>
@@ -626,44 +636,50 @@ function prevStep() {
         <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
           <h3 class="font-bold text-xl mb-4">Alte defecțiuni</h3>
 
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="noProblems">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="noProblems"
+              :checkedState="fields.otherProblems.value.includes('noProblems')">
               <div class="flex flex-col">
                 <span class="font-bold">Nici o problema</span>
                 <span class="text-slate-500">Ca nou, stare excelenta</span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="speakerProblem">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="speakerProblem"
+              :checkedState="fields.otherProblems.value.includes('speakerProblem')">
               <div class="flex flex-col">
                 <span class="font-bold">Se aude încet/înfundat</span>
                 <span class="text-slate-500"></span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="frontCam/BackCamProblem">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="frontCam/BackCamProblem"
+              :checkedState="fields.otherProblems.value.includes('frontCam/BackCamProblem')">
               <div class="flex flex-col">
                 <span class="font-bold">Probleme cameră față/spate</span>
                 <span class="text-slate-500"></span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="batteryProblem">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="batteryProblem"
+              :checkedState="fields.otherProblems.value.includes('batteryProblem')">
               <div class="flex flex-col">
                 <span class="font-bold">Baterie uzată</span>
                 <span class="text-slate-500">Se descarcă rapid. iPhone cu nivel baterie sub 80% health</span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="fingerprint/FaceIdProblem">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="fingerprint/FaceIdProblem"
+              :checkedState="fields.otherProblems.value.includes('fingerprint/FaceIdProblem')">
               <div class="flex flex-col">
                 <span class="font-bold">Probleme senzor amprenta/Face ID</span>
                 <span class="text-slate-500"></span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="wasRepairedBefore">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="wasRepairedBefore"
+              :checkedState="fields.otherProblems.value.includes('wasRepairedBefore')">
               <div class="flex flex-col">
                 <span class="font-bold">A fost reparat în garanție/contra cost</span>
                 <span class="text-slate-500">A avut o reparatie realizată, schimbat ecran, baterie, etc.
@@ -671,7 +687,8 @@ function prevStep() {
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="otherProblems">
+            <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="otherProblems"
+              :checkedState="fields.otherProblems.value.includes('otherProblems')">
               <div class="flex flex-col">
                 <span class="font-bold">Alte probleme</span>
                 <span class="text-slate-500">Nu pornește, cont iCloud blocat, butoane, porturi nefunctionale,
@@ -683,7 +700,7 @@ function prevStep() {
 
           </div>
 
-          <section v-if="invalids.otherProblems" class="font-bold">{{ invalids.otherProblems }}
+          <section v-if="invalids.otherProblems" class="text-red-500 text-sm">{{ invalids.otherProblems }}
           </section>
         </section>
       </template>
@@ -693,9 +710,10 @@ function prevStep() {
         <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
           <h3 class="font-bold text-xl mb-4">Accesorii si documente disponibile</h3>
 
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
-            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="produsNou">
+            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="produsNou"
+              :checkedState="fields.accesories.value.includes('produsNou')">
               <div class="flex flex-col">
                 <span class="font-bold">Produsul este nou</span>
                 <span class="text-slate-500">Arata impecabil, se poate dovedi achiziția
@@ -703,35 +721,40 @@ function prevStep() {
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="cutieOriginala">
+            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="cutieOriginala"
+              :checkedState="fields.accesories.value.includes('cutieOriginala')">
               <div class="flex flex-col">
                 <span class="font-bold">Cutie</span>
                 <span class="text-slate-500">Doar cutia originala, fara alte accesorii</span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="incarcatorSiCablu">
+            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="incarcatorSiCablu"
+              :checkedState="fields.accesories.value.includes('incarcatorSiCablu')">
               <div class="flex flex-col">
                 <span class="font-bold">Incarcator si cablu original</span>
                 <span class="text-slate-500"></span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="castiOriginale">
+            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="castiOriginale"
+              :checkedState="fields.accesories.value.includes('castiOriginale')">
               <div class="flex flex-col">
                 <span class="font-bold">Casti originale</span>
                 <span class="text-slate-500"></span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="factura">
+            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="factura"
+              :checkedState="fields.accesories.value.includes('factura')">
               <div class="flex flex-col">
                 <span class="font-bold">Factura</span>
                 <span class="text-slate-500"></span>
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="garantie">
+            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="garantie"
+              :checkedState="fields.accesories.value.includes('garantie')">
               <div class="flex flex-col">
                 <span class="font-bold">Garantie</span>
                 <span class="text-slate-500"></span>
@@ -754,28 +777,30 @@ function prevStep() {
             <h5 class="text-[3em] font-bold justify-self-center text-green-500 mb-6">{{ estimatedValue }}</h5>
 
             <label hiden for="name"></label>
+            <section v-if="invalids.name" class="text-red-500 text-sm">{{ invalids.name }}
+            </section>
             <input v-model="fields.name.value" id="name" type="text"
               class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Nume si prenume">
 
-            <section v-if="invalids.name" class="font-bold">{{ invalids.name }}
-            </section>
 
 
 
             <label hiden for="email"></label>
+            <section v-if="invalids.email" class="text-red-500 text-sm">{{ invalids.email }}
+            </section>
             <input v-model="fields.email.value" id="email" type="email"
               class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Email">
 
-            <section v-if="invalids.email" class="font-bold">{{ invalids.email }}
-            </section>
+
 
 
             <label hiden for="phone"></label>
+            <section v-if="invalids.phone" class="text-red-500 text-sm">{{ invalids.phone }}
+            </section>
             <input v-model="fields.phone.value" id="phone" type="number"
               class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Telefon">
 
-            <section v-if="invalids.phone" class="font-bold">{{ invalids.phone }}
-            </section>
+
 
             <div class="flex justify-center">
               <button @click.prevent="submit()"
@@ -805,13 +830,21 @@ function prevStep() {
 
     </form>
 
-    <section v-if="submitted" class="justify-center	text-center">
+    <section v-if="submitted" class="justify-center	text-center relative">
       <!-- <img src="/src/assets/img/check.png" class="w-16 mx-auto mb-16" alt=""> -->
       <h3 class="font-bold text-black text-4xl justify-self-center after:content-['🎉'] -mr-2 mb-4">Felicitări!</h3>
-      <p class="text-slate-600 font-bold	text-xl justify-self-center mb-8">Ai încheiat cu succes procesul de evaluare al telefonului tău.</p>
-      <p class="text-slate-400 text-lg">Vei fi contactat telefonic și prin email în cel mai scurt timp de echipa noastră.</p>
-      <p class="text-slate-400 text-lg">În București poți veni în unul din <a href="https://mobileexpert.ro/contact/">📍magazinele noastre</a> pentru o evaluare pe loc.</p>
+      <p class="text-slate-600 font-bold	text-xl justify-self-center mb-8">Ai încheiat cu succes procesul de evaluare al
+        telefonului tău.</p>
+      <p class="text-slate-400 text-lg">Vei fi contactat telefonic și prin email în cel mai scurt timp de echipa
+        noastră.</p>
+      <p class="text-slate-400 text-lg">În București poți veni în unul din <a
+          href="https://mobileexpert.ro/contact/">📍magazinele noastre</a> pentru o evaluare pe loc.</p>
+
+      <pre class="text-left text-white bg-blue-500 rounded p-3 mt-64 absolute">{{ customerData }}</pre>
+      <pre class="text-left text-white bg-blue-500  rounded p-3 mt-64 absolute right-10">{{ phoneReview }}</pre>
     </section>
+
+    <!-- <pre>{{fields.otherProblems.value}}</pre> -->
     <!-- ⚠️db preview  -->
     <!-- <pre>❌{{ currentPhoneData }}❌</pre>
     <pre>❌{{ invalids }}❌</pre>

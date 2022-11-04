@@ -89,7 +89,7 @@ const fields = {
 
         <section class="flex flex-col items-center">
           <h1 class="text-slate-600	text-2xl justify-self-center">Buy-Back Program</h1>
-          <h2 class="font-bold text-4xl justify-self-center">Află instant cât valorează telefonul tău</h2>
+          <h2 class="font-bold text-4xl justify-self-center text-center">Află instant cât valorează telefonul tău</h2>
           <p class="text-slate-400 text-lg">
             Introdu modelul telefonului și completează informațiile despre starea lui.
           </p>

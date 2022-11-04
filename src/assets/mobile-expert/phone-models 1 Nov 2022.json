@@ -1,19 +1,25 @@
 {
-    "Samsung Z-Fold": {
-        "basePrice": 2100,
+    "Apple iPhone 13 Max": {
+        "basePrice": 1600,
         "custom_Colors": {
-            "black": {
-                "hex": "#111212",
-                "phoneImg": "samsung_galaxy-z-black.jpg",
-                "colorPriceModifier": 20
+            "gold": {
+                "hex": "#F6E0C9",
+                "phoneImg": "apple_iphone-13-pro-max_gold.jpg",
+                "colorPriceModifier": 0
             },
-            "bronze": {
-                "hex": "#e8ae6f",
-                "phoneImg": "samsung_galaxy-z-bronze.jpg",
-                "colorPriceModifier": -80
+            "green": {
+                "hex": "#ef4444",
+                "phoneImg": "apple_iphone-13-pro-max-green.jpg",
+                "colorPriceModifier": 0
+            },
+            "blue": {
+                "hex": "#004999",
+                "phoneImg": "apple_iphone-13-pro-max_blue.jpg",
+                "colorPriceModifier": 0
             }
         },
         "custom_StoragePriceModifiers": {
+            "64gb": -100,
             "128gb": 0,
             "256gb": 200
         },
@@ -21,7 +27,7 @@
             "deblocat": 0,
             "orange": -50,
             "vodafone": -50,
-            "operator strain": -100
+            "operatorStrain": -100
         },
         "displayPriceModifiers": {
             "1/4": -150,
@@ -57,72 +63,6 @@
             "castiOriginale": 100,
             "factura": 30,
             "garantie": 50
-        }
-    },
-    "Apple iPhone 13 Max": {
-        "basePrice": 1300,
-        "custom_Colors": {
-            "gold": {
-                "hex": "#F6E0C9",
-                "phoneImg": "apple_iphone-13-pro-max_gold.jpg",
-                "colorPriceModifier": 0
-            },
-            "green": {
-                "hex": "#ef4444",
-                "phoneImg": "apple_iphone-13-pro-max-green.jpg",
-                "colorPriceModifier": 0
-            },
-            "blue": {
-                "hex": "#004999",
-                "phoneImg": "apple_iphone-13-pro-max_blue.jpg",
-                "colorPriceModifier": 0
-            }
-        },
-        "custom_StoragePriceModifiers": {
-            "64gb": -100,
-            "128gb": 0,
-            "256gb": 200
-        },
-        "networkRestrictionsPriceModifiers": {
-            "deblocat": 0,
-            "orange": -40,
-            "vodafone": -40,
-            "operator strain": -80
-        },
-        "displayPriceModifiers": {
-            "1/4": -300,
-            "2/4": -120,
-            "3/4": -60,
-            "4/4": 20
-        },
-        "backcasePriceModifiers": {
-            "1/4": -120,
-            "2/4": -90,
-            "3/4": -30,
-            "4/4": 10
-        },
-        "laterlsPriceModifiers": {
-            "1/4": -150,
-            "2/4": -100,
-            "3/4": -40,
-            "4/4": 10
-        },
-        "otherProblemsPriceModifiers": {
-            "noProblems": 0,
-            "speakerProblem": -90,
-            "frontCam/BackCamProblem": -200,
-            "batteryProblem": -100,
-            "fingerprint/FaceIdProblem": -50,
-            "wasRepairedBefore": -200,
-            "otherProblems": 0
-        },
-        "accesoriesPriceModifiers": {
-            "produsNou": 100,
-            "cutieOriginala": 30,
-            "incarcatorSiCablu": 120,
-            "castiOriginale": 80,
-            "factura": 15,
-            "garantie": 100
         }
     },
     "Apple iPhone 13": {

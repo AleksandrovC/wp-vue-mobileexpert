@@ -6,26 +6,27 @@ defineProps<{
 </script>
 
 <!-- import prop isModelFound -->
-
+<!-- :class="[ isPhoneModelFound ? 'hidden' : 'block']"  -->
 
 <template>
-  <div :class="[ isPhoneModelFound ? 'text-neutral-400' : 'text-neutral-0']" 
-  class="text-center text-neutral-400">
-    Daca telefonul tau nu se afla in lista, ne poti contacta <a href="#">aici</a>
+  <div v-cloak :class="[ isPhoneModelFound ? 'hidden' : 'block']"
+  class="text-center text-neutral-400 mt-8">
+  <!-- {{isPhoneModelFound}} -->
+  Dacă modelul tău nu se află în listă, <a href="#">contacteaza-ne</a> pentru o evaluare.
   </div>
-  <section class="flex text-center  mt-40">
+  <section class="flex text-center flex-col sm:flex-row gap-6 sm:gap-0 mt-20 sm:mt-40">
     <div class="flex flex-col items-center px-4"><img class="h-16" src='src/assets/img/cumparam-orice-telefon.png'>
-      <h3 class="text-lg font-bold mb-2 ">Cumpărăm *orice modelel</h3>
+      <h3 class="text-lg font-bold mb-2 leading-tight">Cumpărăm *orice modelel</h3>
       <p class="text-sm">Cumpărăm telefoane folosite, noi sau vechi, cu probleme sau in stare impecabila - aproape orice
         model. </p>
     </div>
     <div class="flex flex-col items-center px-4"><img class="h-16" src='src/assets/img/primesti-banii-instant.png'>
-      <h3 class="text-lg font-bold mb-2">Primesti banii rapid în cont</h3>
+      <h3 class="text-lg font-bold mb-2 leading-tight">Primesti banii rapid în cont</h3>
       <p class="text-sm">După ce verificăm telefonul, îți trimitem oferta finală, iar tu primești banii direct în
         contul tău bancar - în cel mai scurt timp posibil.</p>
     </div>
     <div class="flex flex-col items-center px-4"><img class="h-16" src='src/assets/img/ajuti-planeta.png'>
-      <h3 class="text-lg font-bold mb-2">Refolosind ajuti planeta</h3>
+      <h3 class="text-lg font-bold mb-2 leading-tight">Refolosind ajuti planeta</h3>
       <p class="text-sm">Ceea ce pentru tine înseamnă un telefon vechi, pentru altcineva poate fi o bucurie. În
         plus, refolosind resurse ajutam planeta.</p>
     </div>
