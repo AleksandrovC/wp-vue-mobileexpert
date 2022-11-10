@@ -1,38 +1,83 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 defineProps<{
   // modelValue: any
   isPhoneModelFound: boolean //red
 }>();
+
+const questions = ref([
+  {
+    "title": "De aș alege programul Buy-back MobileExpert?",
+    "expanded": false,
+    "description": "Dacă telefonul tău se numără printre modelele pe care le căutăm în acel moment, ai tras lozul câștigător. Ți-l cumpărăm pe loc, iar tu scapi de chinul postării anunțurilor și conversațiilor inutile. Pe scurt, scapi de toate bătăile de cap și câștigi timp și bani."
+  }, {
+    "title": "Cum calculati prețul?",
+    "expanded": false,
+    "description": "Îți garantăm o evaluare corectă a telefonului tău. Ținem cont de valoarea reală a telefonului și de starea produsului din momentul vânzării. Cu cât îți înlocuiești mai repede telefonul, cu atât ai mai multe șanse să recuperezi mai mulți bani din investiția inițială."
+  }, {
+    "title": "Ce se întamplă dacă MobileExpert refuză telefonul?",
+    "expanded": false,
+    "description": "Dacă evaluarea ta nu se potrivește cu a noastră, nu pierzi nimic. Primești telefonul înapoi, fără nicio întrebare. În plus, la prima ofertă refuzată, noi plătim atât evaluarea telefonului, cât și transportul coletului dus-întors."
+  }, {
+    "title": "Colectați și telefone foarte vechi?",
+    "expanded": false,
+    "description": "Dacă te afli în posesia unui telefon depășit din toate punctele de vedere, tot poți să câștigi ceva important. Îți colectăm telefonul, indiferent de model sau an, și ne asigurăm că este reciclat corespunzător. Tu câștigi spațiu în sertar, o sumă simbolică, dar mai ales titlul de membru responsabil al societății noastre."
+  }
+])
+
+
 </script>
 
 <!-- import prop isModelFound -->
 <!-- :class="[ isPhoneModelFound ? 'hidden' : 'block']"  -->
 
 <template>
-  <div v-cloak :class="[ isPhoneModelFound ? 'hidden' : 'block']"
-  class="text-center text-neutral-400 mt-8">
-  <!-- {{isPhoneModelFound}} -->
-  Dacă modelul tău nu se află în listă, <a href="#">contacteaza-ne</a> pentru o evaluare.
+  <div v-cloak :class="[isPhoneModelFound ? 'hidden' : 'block']" class="text-center text-neutral-400 mt-8">
+    <!-- {{isPhoneModelFound}} -->
+    Dacă modelul tău nu se află în listă, <a href="/contact">contacteaza-ne</a> pentru o evaluare.
   </div>
   <section class="flex text-center flex-col sm:flex-row gap-6 sm:gap-0 mt-20 sm:mt-40">
-    <div class="flex flex-col items-center px-4"><img class="h-16" src='src/assets/img/cumparam-orice-telefon.png'>
-      <h3 class="text-lg font-bold mb-2 leading-tight">Cumpărăm *orice modelel</h3>
+    <div class="flex flex-col items-center px-4"><img class="h-16" src='/src/assets/img/cumparam-orice-telefon.png'>
+      <h3 class="text-lg font-bold mb-2 leading-tight">Cumpărăm *orice model</h3>
       <p class="text-sm">Cumpărăm telefoane folosite, noi sau vechi, cu probleme sau in stare impecabila - aproape orice
         model. </p>
     </div>
-    <div class="flex flex-col items-center px-4"><img class="h-16" src='src/assets/img/primesti-banii-instant.png'>
+    <div class="flex flex-col items-center px-4"><img class="h-16" src='/src/assets/img/primesti-banii-instant.png'>
       <h3 class="text-lg font-bold mb-2 leading-tight">Primesti banii rapid în cont</h3>
       <p class="text-sm">După ce verificăm telefonul, îți trimitem oferta finală, iar tu primești banii direct în
         contul tău bancar - în cel mai scurt timp posibil.</p>
     </div>
-    <div class="flex flex-col items-center px-4"><img class="h-16" src='src/assets/img/ajuti-planeta.png'>
+    <div class="flex flex-col items-center px-4"><img class="h-16" src='/src/assets/img/ajuti-planeta.png'>
       <h3 class="text-lg font-bold mb-2 leading-tight">Refolosind ajuti planeta</h3>
       <p class="text-sm">Ceea ce pentru tine înseamnă un telefon vechi, pentru altcineva poate fi o bucurie. În
         plus, refolosind resurse ajutam planeta.</p>
     </div>
   </section>
-  <section class="mt-24">
-    <h2 class=" text-center font-bold text-black text-3xl justify-self-center">Intrebari frecvente</h2>
+  <section class="mt-32 mb-32">
+    <h2 class=" text-center font-bold text-black text-3xl justify-self-center mb-16">Intrebări frecvente</h2>
+
+    <div v-for="(question, index)  of questions" :key="question.title">
+      <div class="title flex justify-between border border-slate-200 text-lg border-1 px-4 py-3"
+        :class="{ 'rounded-t-xl': index == 0, 'rounded-b-xl': (index == questions.length - 1) && !question.expanded }"
+        @click="question.expanded = !question.expanded">
+        <div>
+          <b>{{ question.title }}</b>
+        </div>
+        <div class="flex items-center" :class="{ 'rotate-180': question.expanded }">
+          <svg class="h-3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+            id="Layer_1" x="0px" y="0px" viewBox="0 0 407.436 407.436"
+            style="enable-background:new 0 0 407.436 407.436;" xml:space="preserve">
+            <polygon
+              points="203.718,91.567 0,294.621 21.179,315.869 203.718,133.924 386.258,315.869 407.436,294.621 " />
+          </svg>
+        </div>
+      </div>
+      <div class="description px-4 pt-4 pb-6 bg-blue-50" :class="{ 'rounded-b-xl' : (index == questions.length - 1)}" v-if="question.expanded">
+        {{ question.description }}
+      </div>
+    </div>
+
+
 
     <!-- <details>
       <summary class="border border-neutral-300 p-4 rounded-xl">

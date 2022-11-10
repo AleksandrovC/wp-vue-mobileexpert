@@ -7,6 +7,9 @@
   ],
   "compilerOptions": {
     "baseUrl": ".",
+    "lib": ["es2018", "dom",
+      "ES2021.String"  //added for array.replaceAll compatibility 
+    ],
     // "lib": ["es6", "dom", "es2017"], //added for array.includes compatibility 
     // "target": "es6",  //added for array.includes compatibility
     "paths": {
