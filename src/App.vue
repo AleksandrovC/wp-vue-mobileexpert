@@ -17,13 +17,17 @@ import CheckboxButton from "./components/CheckboxButton.vue";
 
 let allPhonesData: any = ref()
 const phoneNames = ref()
+const isMobileResolution = ref(false)
+const fetchMessageResult = ref()
+const fetchMessageError = ref()
+
 
 
 onBeforeMount(async () => {
   let jsonAddress = ""
 
   //on DEV json path points to /public/json, on PROD to /dist/json
-  if(import.meta.env.PROD){
+  if (import.meta.env.PROD) {
     // jsonAddress = "/buy-back/json/phone-models.json"
     jsonAddress = "/wp-content/plugins/wp-vue-customBuyBackModule/json/phone-models.json"
   } else if (import.meta.env.DEV) {
@@ -38,7 +42,11 @@ onBeforeMount(async () => {
   // console.log(phoneNames.value)
 });
 // console.log('allPhonesData', allPhonesData.value)
+if (window.innerWidth < 600) {
+  isMobileResolution.value = true
+}
 
+console.log(window.innerWidth)
 
 // console.log(jsonData.value)
 // phone-model.json -> este adaugat in public (ca static) ca sa nu fie bundled by Vite 
@@ -86,6 +94,14 @@ const isPhoneModelFound = computed(() => {
 const isInvalid = computed(() => {
   return !!Object.values(invalids.value).filter((key) => key).length;
 
+})
+
+const mainInputPlaceholder = computed(() => {
+  if (isMobileResolution.value == false) {
+    return 'Introdu modelul telefonului tau - Exemplu: Samsung S22'
+  } else if (isMobileResolution.value) {
+    return 'Introdu modelul telefonului'
+  }
 })
 
 const invalids: any = ref({})
@@ -212,7 +228,12 @@ const fields: any = ref({
       {
         message: "Completeaza Email",
         test: (value: string) => value
-      }
+      },
+      {
+        message: "Adresa email invalida",
+        test: (value: string) => ( /^\w+([\.\+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value))
+
+      },
     ]
   },
   phone: {
@@ -250,7 +271,14 @@ const currentFields: any = computed(() => {
 const phonePictureUrl = computed(() => {
   let selectedColor = currentPhoneData.value.custom_Colors[fields.value.color.value].phoneImg
   // console.log(new URL(`/src/assets/img/phones-img/${selectedColor}`, import.meta.url).href)
-  return new URL(`/src/assets/img/phones-img/${selectedColor}`, import.meta.url).href
+  if (import.meta.env.PROD) {
+    return new URL('/wp-content/plugins/wp-vue-customBuyBackModule/phones-img/' + selectedColor, import.meta.url).href
+
+  }
+
+  if (import.meta.env.DEV) {
+    return new URL(`/src/assets/img/phones-img/${selectedColor}`, import.meta.url).href
+  }
   // return new URL(`../public/assets/phones-img/${selectedColor}`, import.meta.url).href
 
   // '/src/assets/img/phones-img/' + selectedColor
@@ -307,9 +335,9 @@ function estimateValue() {
   })
 
 
-  console.log(Object.values(phoneReview.value))
-  console.log(Object.keys(phoneReview.value))
-  console.log(Object.values(phoneReview.value).reduce((a: any, b: any) => a + b, 0))
+  // console.log(Object.values(phoneReview.value))
+  // console.log(Object.keys(phoneReview.value))
+  // console.log(Object.values(phoneReview.value).reduce((a: any, b: any) => a + b, 0))
 
   phoneReview.value["Estimated Price"] = Object.values(phoneReview.value).reduce((a: any, b: any) => a + b, 0)
 
@@ -359,7 +387,6 @@ function submit() {
   }
   // submit on valid form
   console.log("doing submit", phoneReview.value, customerData.value);
-  submitted.value = true;
 
 
   // let phoneReviewParsed :any = JSON
@@ -369,11 +396,11 @@ function submit() {
   //       "],\n\n\t\""
   //   )
 
-  let phoneReviewParsed :any = JSON
+  let phoneReviewParsed: any = JSON
     .stringify(phoneReview.value, null, "\t")
     .replaceAll(
-        "],\n\t\"", 
-        "],\n\n\t\""
+      "],\n\t\"",
+      "],\n\n\t\""
     );
 
 
@@ -392,11 +419,35 @@ function submit() {
     redirect: 'follow'
   };
 
+  //   function checkFetchErrors(value:any) {
+  //     if (!value) {
+  //         //do something
+  //         return doSomething().then(doSomethingMore).then(doEvenSomethingMore);
+  //     } else {
+  //         //do something else
+  //         return doSomeOtherThing().then(doSomethingMore).then(doEvenSomethingMore);
+  //     }
+  // }
+
   fetch("https://mobileexpert.ro/wp-json/contact-form-7/v1/contact-forms/17895/feedback", requestOptions)
     .then(response => response.text())
-    .then(result => console.log(result))
-    .catch(error => console.log('error', error));
+    .then(result => fetchMessageResult.value = JSON.parse(result))
+    .catch(error => fetchMessageError.value = JSON.parse(error))
+    // .finally(checkSent());
 
+
+function checkSent() {
+
+   if (fetchMessageError.value.status == "mail_sent") {
+    submitted.value = true
+    return Promise.resolve('mail_sentt')
+  }
+
+  if (fetchMessageError.value.status = "validation_failed") {
+    submitted.value = false
+    return Promise.resolve('validation_failed')
+  }
+} 
 
 
   // -----------
@@ -519,14 +570,17 @@ function prevStep() {
       <template v-if="isFirstStep">
         <FirstScreenHeader />
 
-        <input class="w-full border rounded-full border-blue-400 px-6 py-2 bg-blue-50"
-          :class="{ 'font-bold': isPhoneModelFound }"
-          placeholder="Introdu modelul telefonului tau - Exemplu: Samsung S22" type="search"
+        <input style="font-size: 1rem; border-color: rgb(96 165 250) !important; color: black !important;"
+          class="w-full border rounded-full border-blue-400 px-6 py-2 bg-blue-50"
+          :class="{ 'font-bold': isPhoneModelFound }" :placeholder="mainInputPlaceholder" type="search"
           v-model="fields.phoneModel.value" list="data" />
 
         <datalist v-if="!isPhoneModelFound" id="data">
           <option v-for="phoneName in phoneNames" :value="phoneName"></option>
         </datalist>
+        <div v-cloak :class="[isPhoneModelFound ? 'opacity-0	pointer-events-none' : 'opacity-100 pointer-events-auto']" class="text-center text-slate-400 mt-2 text-sm">
+    Dacă modelul tău <b>nu</b> se află în listă, <a  style="color: #3b82f6" href="/contact">contacteaza-ne</a> pentru o evaluare.
+  </div>
       </template>
 
       <template v-if="currentStep === 1">
@@ -556,7 +610,7 @@ function prevStep() {
               <div
                 class="bg-blue-100 group ml-2 relative inline-flex text-sm  rounded-full text-blue-500 h-6 w-6 items-center justify-center cursor-pointer">
                 ?
-                <span
+                <span style="border-color:rgb(191 219 254) !important; font-size: 0.875rem !important;"
                   class="invisible group-hover:visible absolute bg-white text-blue-500 border border-blue-200 text-sm px-2 py-2 rounded-xl z-10 w-72 sm:w-96 sm:-left-12 -left-28 ">iPhone:
                   Setari
                   &gt; General &gt; Informatii <br> <br>
@@ -576,11 +630,11 @@ function prevStep() {
               </section>
             </section>
             <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
-              <h3 class="font-bold inline-flex text-xl mb-4">Este blocat în reațea?</h3>
+              <h3 class="font-bold inline-flex text-xl mb-4">Este blocat în rețea?</h3>
               <div
                 class="bg-blue-100 group ml-2 relative inline-flex text-sm  rounded-full text-blue-500 h-6 w-6 items-center justify-center cursor-pointer">
                 ?
-                <span
+                <span style="border-color:rgb(191 219 254) !important; font-size: 0.875rem !important;"
                   class="invisible group-hover:visible absolute bg-white text-blue-500 border border-blue-200 text-sm px-2 py-2 rounded-xl z-10 w-72 sm:w-96 -top-32 sm:-top-16 -right-14 sm:-left-12 ">
                   <p class="mb-1">Orange
                     și Vodafone, blochează unele telefoane în rețeaua operatorului. </p>
@@ -620,7 +674,7 @@ function prevStep() {
               :colorClasses="'from-red-500 to-red-800'">
               <div class="flex flex-col">
                 <span class="font-bold">Ca nou</span>
-                <span class="text-slate-500">Stare perfecta, fara zgarieturi</span>
+                <span class="text-slate-500">Stare perfectă fără defecte, zgârieturi, fisuri</span>
               </div>
             </RadioButton>
 
@@ -749,7 +803,7 @@ function prevStep() {
             <CheckboxButton @update-checkbox-input="updateProblemsCheckbox" radioBtnName="noProblems"
               :checkedState="fields.otherProblems.value.includes('noProblems')">
               <div class="flex flex-col">
-                <span class="font-bold">Nici o problema</span>
+                <span class="font-bold">Nicio problema</span>
                 <span class="text-slate-500">Ca nou, stare excelenta</span>
               </div>
             </CheckboxButton>
@@ -857,7 +911,7 @@ function prevStep() {
               :checkedState="fields.accesories.value.includes('factura')">
               <div class="flex flex-col">
                 <span class="font-bold">Factură</span>
-                <span class="text-slate-500"></span>
+                <span class="text-slate-500">În format printat sau digital transmisibil, pdf,, etc.</span>
               </div>
             </CheckboxButton>
 
@@ -865,7 +919,7 @@ function prevStep() {
               :checkedState="fields.accesories.value.includes('garantie')">
               <div class="flex flex-col">
                 <span class="font-bold">Garanție</span>
-                <span class="text-slate-500"></span>
+                <span class="text-slate-500">În format printat sau digital transmisibil, pdf,  etc.</span>
               </div>
             </CheckboxButton>
 
@@ -880,14 +934,14 @@ function prevStep() {
 
           <div class="grid">
 
-            <h4 class="text-xl font-bold justify-self-center">Valoare estimata</h4>
-            <h5 class="text-[3em] font-bold justify-self-center text-green-500 mb-6">{{ estimatedValue }}</h5>
-
+            <h4 class="text-xl font-bold justify-self-center">Valoare estimată</h4>
+            <h5 class="text-[3em] font-bold justify-self-center text-green-500 mb-6">{{ estimatedValue }} <span class="text-xl">LEI</span></h5>
+            <p class="text-center my-2  font-bold text-slate-500">Completează formularul și vei fi contactat pentru a finaliza procesul de buy-back.</p>
             <label hiden for="name"></label>
             <section v-if="invalids.name" class="text-red-500 text-sm">{{ invalids.name }}
             </section>
-            <input v-model="fields.name.value" id="name" type="text"
-              class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Nume si prenume">
+            <input v-model="fields.name.value" id="name" type="text" style="border-radius: 0.25rem!important"
+              class="!border-slate-300 !border !rounded !px-4 !py-2 !mb-3" placeholder="Nume si prenume">
 
 
 
@@ -895,7 +949,7 @@ function prevStep() {
             <label hiden for="email"></label>
             <section v-if="invalids.email" class="text-red-500 text-sm">{{ invalids.email }}
             </section>
-            <input v-model="fields.email.value" id="email" type="email"
+            <input v-model="fields.email.value" id="email" type="email" style="border-radius: 0.25rem!important"
               class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Email">
 
 
@@ -904,15 +958,20 @@ function prevStep() {
             <label hiden for="phone"></label>
             <section v-if="invalids.phone" class="text-red-500 text-sm">{{ invalids.phone }}
             </section>
-            <input v-model="fields.phone.value" id="phone" type="number"
+            <input v-model="fields.phone.value" id="phone" type="number" style="border-radius: 0.25rem!important"
               class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Telefon">
+            <p class="text-xs text-center text-slate-500 mb-10">Prin transmiterea datelor personale esti de acord cu <a
+                href="/politica-de-confidentialitate/" target="_blank">Politica de Confidențialitate</a> și <a
+                href="/termeni-si-conditii/" target="_blank">Termenii și
+                Condițiile</a> site-ului.</p>
 
 
 
             <div class="flex justify-center">
-              <button @click.prevent="submit()"
-                class="bg-green-600 px-14 py-4 rounded-md text-white font-bold mt-4">Vreau sa fiu
+              <button @click.prevent="submit()" style="border-color:none !important; padding: 1rem 3.5rem !important;"
+                class="bg-green-600 whitespace-nowrap rounded-md text-white font-bold mt-4">Vreau sa fiu
                 contactat</button>
+              {{ fetchMessageError  }}
             </div>
 
           </div>
@@ -922,13 +981,14 @@ function prevStep() {
 
 
       <footer :class="[isLastStep || isFirstStep ? 'justify-center' : 'justify-between']"
-        class="flex flex-row-reverse gap-2 mt-5 w-full">
+        class="flex flex-row-reverse gap-2 mt-5  w-full">
+
         <button v-if="!isLastStep" :disabled=!isPhoneModelFound
-          class="bg-blue-100 px-12 py-3 rounded-md  text-blue-500 disabled:opacity-50 font-bold"
+          class="bg-blue-100 px-12 py-[0.75rem] rounded-md border-[#e5e7eb]  text-blue-500 disabled:opacity-50 font-bold"
           @click.prevent="nextStep">
           Next &gt;
         </button>
-        <button v-if="!isFirstStep" class="text-neutral-500" @click.prevent="prevStep">
+        <button v-if="!isFirstStep" class="text-neutral-500 border-[#fff]" @click.prevent="prevStep">
           &lt; Previous
         </button>
       </footer>
@@ -938,7 +998,12 @@ function prevStep() {
     </form>
 
     <section v-if="submitted" class="justify-center	text-center relative">
-      <h3 class="font-bold text-black text-4xl justify-self-center after:content-['🎉'] -mr-2 mb-4">Felicitări!</h3>
+      <h3 class="font-bold text-black text-4xl justify-self-center after:content-['🎉'] -mr-2 mb-4 mt-[6rem]">
+        Felicitări!</h3>
+      {{ fetchMessageResult }}
+      {{ fetchMessageError }}
+
+
       <p class="text-slate-600 font-bold	text-xl justify-self-center mb-8">Ai încheiat cu succes procesul de evaluare al
         telefonului tău.</p>
       <p class="text-slate-400 text-lg">Vei fi contactat telefonic și prin email în cel mai scurt timp de echipa
@@ -946,8 +1011,8 @@ function prevStep() {
       <p class="text-slate-400 text-lg">În București poți veni în unul din <a
           href="https://mobileexpert.ro/contact/">📍magazinele noastre</a> pentru o evaluare pe loc.</p>
 
-      <pre class="text-left text-white bg-blue-500 rounded p-3 mt-64 absolute">{{ customerData }}</pre>
-      <pre class="text-left text-white bg-blue-500  rounded p-3 mt-64 absolute right-10">{{ phoneReview }}</pre>
+      <!-- <pre class="text-left text-white bg-blue-500 rounded p-3 mt-64 absolute">{{ customerData }}</pre>
+      <pre class="text-left text-white bg-blue-500  rounded p-3 mt-64 absolute right-10">{{ phoneReview }}</pre> -->
     </section>
 
     <!-- <pre>{{ fields }}</pre> -->

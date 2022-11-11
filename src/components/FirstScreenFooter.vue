@@ -25,6 +25,14 @@ const questions = ref([
   }
 ])
 
+const imgPath = ref('')
+
+if(import.meta.env.PROD){
+  imgPath.value = '/wp-content/plugins/wp-vue-customBuyBackModule/'
+} else if (import.meta.env.DEV) {
+  imgPath.value = '/src/assets/img/'
+}
+
 
 </script>
 
@@ -32,22 +40,21 @@ const questions = ref([
 <!-- :class="[ isPhoneModelFound ? 'hidden' : 'block']"  -->
 
 <template>
-  <div v-cloak :class="[isPhoneModelFound ? 'hidden' : 'block']" class="text-center text-neutral-400 mt-8">
-    <!-- {{isPhoneModelFound}} -->
-    Dacă modelul tău nu se află în listă, <a href="/contact">contacteaza-ne</a> pentru o evaluare.
-  </div>
+  <!-- <div v-cloak :class="[isPhoneModelFound ? 'hidden' : 'block']" class="text-center text-neutral-400 mt-8">
+    Dacă modelul tău <b>nu</b> se află în listă, <a style="color: #3b82f6" href="/contact">contacteaza-ne</a> pentru o evaluare.
+  </div> -->
   <section class="flex text-center flex-col sm:flex-row gap-6 sm:gap-0 mt-20 sm:mt-40">
-    <div class="flex flex-col items-center px-4"><img class="h-16" src='/src/assets/img/cumparam-orice-telefon.png'>
-      <h3 class="text-lg font-bold mb-2 leading-tight">Cumpărăm *orice model</h3>
+    <div class="flex flex-col items-center px-4 flex-1"><img class="h-16" :src="imgPath + 'cumparam-orice-telefon.png'">
+      <h3 class="text-lg font-bold mb-2 leading-tight">Cumpărăm orice* model</h3>
       <p class="text-sm">Cumpărăm telefoane folosite, noi sau vechi, cu probleme sau in stare impecabila - aproape orice
         model. </p>
     </div>
-    <div class="flex flex-col items-center px-4"><img class="h-16" src='/src/assets/img/primesti-banii-instant.png'>
+    <div class="flex flex-col items-center px-4 flex-1"><img class="h-16" :src="imgPath + 'primesti-banii-instant.png'">
       <h3 class="text-lg font-bold mb-2 leading-tight">Primesti banii rapid în cont</h3>
       <p class="text-sm">După ce verificăm telefonul, îți trimitem oferta finală, iar tu primești banii direct în
         contul tău bancar - în cel mai scurt timp posibil.</p>
     </div>
-    <div class="flex flex-col items-center px-4"><img class="h-16" src='/src/assets/img/ajuti-planeta.png'>
+    <div class="flex flex-col items-center px-4 flex-1"><img class="h-16" :src="imgPath + 'ajuti-planeta.png'">
       <h3 class="text-lg font-bold mb-2 leading-tight">Refolosind ajuti planeta</h3>
       <p class="text-sm">Ceea ce pentru tine înseamnă un telefon vechi, pentru altcineva poate fi o bucurie. În
         plus, refolosind resurse ajutam planeta.</p>
@@ -72,7 +79,7 @@ const questions = ref([
           </svg>
         </div>
       </div>
-      <div class="description px-4 pt-4 pb-6 bg-blue-50" :class="{ 'rounded-b-xl' : (index == questions.length - 1)}" v-if="question.expanded">
+      <div class="description px-4 pt-4 pb-6 bg-blue-50 border-x	border-slate-200" :class="{ 'rounded-b-xl' : (index == questions.length - 1)}" v-if="question.expanded">
         {{ question.description }}
       </div>
     </div>

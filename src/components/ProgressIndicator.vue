@@ -8,7 +8,7 @@ defineProps<{
 
 <template>
   <div class="flex items-stretch gap-2">
-    <div v-for="step in (totalSteps - 1)" class="h-2 w-full rounded text-blue-500" style="border: 1px solid;"
+    <div v-for="step in (totalSteps - 1)" class="h-2 w-full rounded-[1rem] text-blue-500" style="border: 1px solid;"
       :class="{ 'bg-blue-500 ': step <= currentStep }"></div>
   </div>
 </template>

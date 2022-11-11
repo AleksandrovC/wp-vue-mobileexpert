@@ -5,7 +5,7 @@ import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/wp-content/plugins/wp-vue-customBuyBackModule/',
+  // base: '/wp-content/plugins/wp-vue-customBuyBackModule/',
   // assetsInclude: ['**/*.json'],
   // optimizeDeps:{
   //   exclude: ['phone-models.json']
