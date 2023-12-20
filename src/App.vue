@@ -6,25 +6,19 @@ import FirstScreenFooter from "./components/FirstScreenFooter.vue";
 import RadioButton from "./components/RadioButton.vue"
 import { ref, reactive, computed, nextTick, onBeforeMount, onMounted } from 'vue';
 import CheckboxButton from "./components/CheckboxButton.vue";
-// import jsonData from './assets/mobile-expert/phone-models.json'
-// import jsonData from '/assets/phone-models.json'
-
-// import jsonData from '../public/assets/phone-models.json'
-// let jsonData = import.meta.glob('/public/assets/phone-models.json')
-// const jsonData = await import('/phone-models.json')
-
 
 
 let allPhonesData: any = ref()
 const phoneNames = ref()
 const isMobileResolution = ref(false)
-const fetchMessageResult = ref()
+const fetchMessageResult = ref({ "message": "", "status": "" })
 const fetchMessageError = ref()
-
+const h2title = ref<HTMLElement | null>(null)
 
 
 onBeforeMount(async () => {
   let jsonAddress = ""
+
 
   //on DEV json path points to /public/json, on PROD to /dist/json
   if (import.meta.env.PROD) {
@@ -35,34 +29,20 @@ onBeforeMount(async () => {
   }
   const response = await fetch(jsonAddress)
   allPhonesData.value = await response.json()
-  // allPhonesData = file
-  // console.log("cool file", allPhonesData.value)
+
 
   phoneNames.value = Object.keys(allPhonesData.value)
-  // console.log(phoneNames.value)
 });
-// console.log('allPhonesData', allPhonesData.value)
 if (window.innerWidth < 600) {
   isMobileResolution.value = true
 }
 
-console.log(window.innerWidth)
-
-// console.log(jsonData.value)
-// phone-model.json -> este adaugat in public (ca static) ca sa nu fie bundled by Vite 
-//
-// import { createConditionalExpression } from "@vue/compiler-core";
-
 const currentStep = ref(0)
-// const allPhonesData: any = jsonData.value
-// const phoneNames = Object.keys(allPhonesData.value)
+
 const currentPhoneData: any = ref({});
-// const currentPhoneImg = ref("");
 const customerData: any = ref({})
-// let defaultColor: any = ""
 
 
-// console.log('allPhonesData', allPhonesData)
 const isPhoneModelFound = computed(() => {
 
   if (!allPhonesData.value) {
@@ -231,7 +211,7 @@ const fields: any = ref({
       },
       {
         message: "Adresa email invalida",
-        test: (value: string) => ( /^\w+([\.\+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value))
+        test: (value: string) => (/^\w+([\.\+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value))
 
       },
     ]
@@ -261,7 +241,7 @@ const steps = [
   ["name", "email", "phone"]
 ]
 
-const submitted = ref(false)
+const isSubmitted = ref(false)
 
 
 const currentFields: any = computed(() => {
@@ -270,7 +250,6 @@ const currentFields: any = computed(() => {
 
 const phonePictureUrl = computed(() => {
   let selectedColor = currentPhoneData.value.custom_Colors[fields.value.color.value].phoneImg
-  // console.log(new URL(`/src/assets/img/phones-img/${selectedColor}`, import.meta.url).href)
   if (import.meta.env.PROD) {
     return new URL('/wp-content/plugins/wp-vue-customBuyBackModule/phones-img/' + selectedColor, import.meta.url).href
 
@@ -335,17 +314,10 @@ function estimateValue() {
   })
 
 
-  // console.log(Object.values(phoneReview.value))
-  // console.log(Object.keys(phoneReview.value))
-  // console.log(Object.values(phoneReview.value).reduce((a: any, b: any) => a + b, 0))
-
   phoneReview.value["Estimated Price"] = Object.values(phoneReview.value).reduce((a: any, b: any) => a + b, 0)
 
 
 
-  // console.log(fields.value.color.value)
-  // console.log(currentPhoneData)
-  // return currentPhoneData.value.basePrice
   return estimatedValue.value = phoneReview.value["Estimated Price"]
 
 }
@@ -385,16 +357,7 @@ function submit() {
     "telefon": fields.value.phone.value,
     "email": fields.value.email.value
   }
-  // submit on valid form
-  console.log("doing submit", phoneReview.value, customerData.value);
 
-
-  // let phoneReviewParsed :any = JSON
-  //   .stringify(phoneReview.value, null, "\t")
-  //   .replaceAll(
-  //       "],\n\t\"", 
-  //       "],\n\n\t\""
-  //   )
 
   let phoneReviewParsed: any = JSON
     .stringify(phoneReview.value, null, "\t")
@@ -411,6 +374,8 @@ function submit() {
   formdata.append("your-name", fields.value.name.value);
   formdata.append("your-phone", fields.value.phone.value)
   formdata.append("your-email", fields.value.email.value);
+  formdata.append("your-subject", fields.value.phoneModel.value);
+
   formdata.append("your-message", phoneReviewParsed)
 
   let requestOptions: any = {
@@ -419,77 +384,15 @@ function submit() {
     redirect: 'follow'
   };
 
-  //   function checkFetchErrors(value:any) {
-  //     if (!value) {
-  //         //do something
-  //         return doSomething().then(doSomethingMore).then(doEvenSomethingMore);
-  //     } else {
-  //         //do something else
-  //         return doSomeOtherThing().then(doSomethingMore).then(doEvenSomethingMore);
-  //     }
-  // }
-
   fetch("https://mobileexpert.ro/wp-json/contact-form-7/v1/contact-forms/17895/feedback", requestOptions)
     .then(response => response.text())
     .then(result => fetchMessageResult.value = JSON.parse(result))
     .catch(error => fetchMessageError.value = JSON.parse(error))
-    // .finally(checkSent());
-
-
-function checkSent() {
-
-   if (fetchMessageError.value.status == "mail_sent") {
-    submitted.value = true
-    return Promise.resolve('mail_sentt')
-  }
-
-  if (fetchMessageError.value.status = "validation_failed") {
-    submitted.value = false
-    return Promise.resolve('validation_failed')
-  }
-} 
-
-
-  // -----------
-
-  // const emailBody :any = {
-  //     "your-name": fields.value.name.value ,
-  //     "your-email": fields.value.email.value,
-  //     "your-phone": fields.value.phone.value,
-  // };
-
-
-  // // Create a FormData object, and append each field to the object
-  // const formData = new FormData();
-  // // console.log(formData.entries())
-  // for (const field in emailBody) {
-  //   formData.append(field, emailBody[field]);
-  //     console.log(formData.entries())
-  // }
-
-  // for (var pair of formData.entries()) {
-  //     console.log(pair[0]+ ', ' + pair[1]); 
-  // }
-
-  //   let fetchData = emailBody
-  //   let response = ''
-  //    // Simple POST request with a JSON body using fetch
-  //    const requestOptions = {
-  //     method: "POST",
-  //     headers: { "Content-Type": "multipart/form-data" },
-  //     // body: JSON.stringify({ emailBody })
-  //     body: formData
-  //   };
-  //   // console.log(form.values())
-  //   // fetch("https://mobileexpert.ro/wp-json/contact-form-7/v1/contact-forms/17895/feedback", requestOptions)
-  //   //   .then(response => response.json())
-  //   //   .then((data) => console.log(data));
-
-
-  // // ---------
-
-
-
+    .finally(() => {
+      if (fetchMessageResult.value.status == "mail_sent") {
+        isSubmitted.value = true
+      }
+    })
 }
 
 function updateProblemsCheckbox(checked: any) {
@@ -503,18 +406,12 @@ function updateProblemsCheckbox(checked: any) {
     return fields.value.otherProblems.value = fields.value.otherProblems.value.filter((v: string) => v !== checked);
   }
 
-  // console.log(fields.value.otherProblems.value)
 
   return fields.value.otherProblems.value = [...fields.value.otherProblems.value, checked]
 }
 
 
 function updateAccesoriesCheckbox(checked: any) {
-  // const value = value;
-
-  // if( value === "Fara probleme") {
-  //   return fields.value.otherProblems.value = ["", "Fara probleme"]
-  // }
 
   if (fields.value.accesories.value.includes(checked)) {
     return fields.value.accesories.value = fields.value.accesories.value.filter((v: string) => v !== checked);
@@ -523,7 +420,11 @@ function updateAccesoriesCheckbox(checked: any) {
   return fields.value.accesories.value = [...fields.value.accesories.value, checked]
 }
 
-function nextStep(values: any) {
+function flushQueue() {
+ return new Promise((resolve) => setTimeout(resolve, 100));
+}
+
+async function nextStep(values: any) {
   // if validate
 
   validate();
@@ -531,22 +432,30 @@ function nextStep(values: any) {
 
   currentStep.value++;
 
-  // console.log(totalSteps.value)
-  // console.log(currentStep.value)
-
   if (isLastStep.value) {
-    // console.log('merge')
     estimateValue()
-    // console.log('Done: ', JSON.stringify(values, null, 2));
     return;
+  }
+  await flushQueue()
+  if (h2title.value) {
+    // await nextTick()
+    h2title.value.scrollIntoView({ behavior: "smooth", block: "start" })
+
   }
 }
 
-function prevStep() {
+async function prevStep() {
   if (isFirstStep.value) {
     return;
   }
   currentStep.value--;
+
+  await flushQueue()
+  if (h2title.value) {
+    // console.log(h2title.value)
+    h2title.value?.scrollIntoView({ behavior: "smooth", block: "start" })
+
+  }
 }
 
 
@@ -555,12 +464,12 @@ function prevStep() {
 
 <template>
   <div id="multi-step-form" class="grid w-full max-w-5xl justify-self-center">
-    <form v-if="!submitted" class="sm:p-10" @submit.prevent="">
+    <form v-if="!isSubmitted" class="sm:p-10" @submit.prevent="">
 
 
       <div v-show="!isFirstStep" class="mb-2">
         <h1 class="text-neutral-500">Oferta Buy-back</h1>
-        <h2 class="text-[2em] font-bold">{{ fields.phoneModel.value }}</h2>
+        <h2 ref="h2title" class="text-[2em] font-bold">{{ fields.phoneModel.value }}</h2>
 
       </div>
 
@@ -578,15 +487,17 @@ function prevStep() {
         <datalist v-if="!isPhoneModelFound" id="data">
           <option v-for="phoneName in phoneNames" :value="phoneName"></option>
         </datalist>
-        <div v-cloak :class="[isPhoneModelFound ? 'opacity-0	pointer-events-none' : 'opacity-100 pointer-events-auto']" class="text-center text-slate-400 mt-2 text-sm">
-    Dacă modelul tău <b>nu</b> se află în listă, <a  style="color: #3b82f6" href="/contact">contacteaza-ne</a> pentru o evaluare.
-  </div>
+        <div v-cloak :class="[isPhoneModelFound ? 'opacity-0	pointer-events-none' : 'opacity-100 pointer-events-auto']"
+          class="text-center text-slate-400 mt-2 text-sm">
+          Dacă modelul tău <b>nu</b> se află în listă, <a style="color: #3b82f6" href="/contact">contacteaza-ne</a>
+          pentru o evaluare.
+        </div>
       </template>
 
       <template v-if="currentStep === 1">
         <div class="flex flex-col md:flex-row">
-          <div class="mr-10 w-32">
-            <img :src="phonePictureUrl" class="h-60" alt="">
+          <div class="mr-10 flex justify-center min-w-[15rem] min-h-[15rem]">
+            <img :src="phonePictureUrl" class="h-60 max-w-fit" alt="">
           </div>
           <div>
             <section class="mb-10 pt-6 pb-10 border-b border-slate-400">
@@ -595,11 +506,16 @@ function prevStep() {
               <div class="flex flex-wrap gap-2">
                 <RadioButton v-for="(color, key, i) in currentPhoneData.custom_Colors" v-model="fields.color.value"
                   radioGroupName="color" :radioBtnName="key.toString()" @change="validateField('color')">
-                  <div class="rounded-full relative h-8 w-8" :style="{ backgroundColor: color.hex }">
-                    <div class="rounded-full absolute h-8 w-8  bg-gradient-to-t from-black/20 via-black/10 to-black/0">
+                  <section class="grid items-center justify-center">
+                    <div class="rounded-full mt-2 relative h-8 w-8" :style="{ backgroundColor: color.hex }">
+                      <div
+                        class="rounded-full absolute h-8 w-8  bg-gradient-to-t from-black/20 via-black/10 to-black/0">
+                      </div>
+                      <div class="rounded-full absolute h-8 w-8 mix-blend-color-dodge"></div>
                     </div>
-                    <div class="rounded-full absolute h-8 w-8 mix-blend-color-dodge"></div>
-                  </div>
+                    <h4 class=" !mb-[0rem] -mx-8 mt-1 text-slate-600 !text-[0.75rem] !font-[400] text-center">{{ key }}
+                    </h4>
+                  </section>
                 </RadioButton>
 
               </div>
@@ -891,21 +807,29 @@ function prevStep() {
               </div>
             </CheckboxButton>
 
-            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="incarcatorSiCablu"
+            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="toateAcesoriile"
+              :checkedState="fields.accesories.value.includes('toateAcesoriile')">
+              <div class="flex flex-col">
+                <span class="font-bold">Toate acesoriile originale oferite de producător</span>
+                <span class="text-slate-500">Încărcător, cablu, căști, ghid utilizare, adaptoare</span>
+              </div>
+            </CheckboxButton>
+
+            <!-- <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="incarcatorSiCablu"
               :checkedState="fields.accesories.value.includes('incarcatorSiCablu')">
               <div class="flex flex-col">
                 <span class="font-bold">Încărcător și cablu original</span>
                 <span class="text-slate-500"></span>
               </div>
-            </CheckboxButton>
+            </CheckboxButton> -->
 
-            <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="castiOriginale"
+            <!-- <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="castiOriginale"
               :checkedState="fields.accesories.value.includes('castiOriginale')">
               <div class="flex flex-col">
                 <span class="font-bold">Căști originale</span>
                 <span class="text-slate-500"></span>
               </div>
-            </CheckboxButton>
+            </CheckboxButton> -->
 
             <CheckboxButton @update-checkbox-input="updateAccesoriesCheckbox" radioBtnName="factura"
               :checkedState="fields.accesories.value.includes('factura')">
@@ -919,7 +843,7 @@ function prevStep() {
               :checkedState="fields.accesories.value.includes('garantie')">
               <div class="flex flex-col">
                 <span class="font-bold">Garanție</span>
-                <span class="text-slate-500">În format printat sau digital transmisibil, pdf,  etc.</span>
+                <span class="text-slate-500">În format printat sau digital transmisibil, pdf, etc.</span>
               </div>
             </CheckboxButton>
 
@@ -935,13 +859,16 @@ function prevStep() {
           <div class="grid">
 
             <h4 class="text-xl font-bold justify-self-center">Valoare estimată</h4>
-            <h5 class="text-[3em] font-bold justify-self-center text-green-500 mb-6">{{ estimatedValue }} <span class="text-xl">LEI</span></h5>
-            <p class="text-center my-2  font-bold text-slate-500">Completează formularul și vei fi contactat pentru a finaliza procesul de buy-back.</p>
+            <h5 class="text-[3em] font-bold justify-self-center text-green-500 mb-6">{{ estimatedValue }} <span
+                class="text-xl">LEI</span></h5>
+            <p class="text-center my-2  font-bold text-slate-500">Completează formularul și vei fi contactat pentru a
+              finaliza procesul de buy-back.</p>
             <label hiden for="name"></label>
             <section v-if="invalids.name" class="text-red-500 text-sm">{{ invalids.name }}
             </section>
-            <input v-model="fields.name.value" id="name" type="text" style="border-radius: 0.25rem!important"
-              class="!border-slate-300 !border !rounded !px-4 !py-2 !mb-3" placeholder="Nume si prenume">
+            <input v-model="fields.name.value" id="name" type="text" 
+              class="!border-slate-300 !border !px-4 !py-2 !mb-3 !rounded-[0.375rem] !h-[3rem] !text-[1rem]"
+              placeholder="Nume si prenume">
 
 
 
@@ -949,8 +876,8 @@ function prevStep() {
             <label hiden for="email"></label>
             <section v-if="invalids.email" class="text-red-500 text-sm">{{ invalids.email }}
             </section>
-            <input v-model="fields.email.value" id="email" type="email" style="border-radius: 0.25rem!important"
-              class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Email">
+            <input v-model="fields.email.value" id="email" type="email"
+              class="border-slate-300 border  px-4 py-2 mb-3 !rounded-[0.375rem] !h-[3rem] !text-[1rem]" placeholder="Email">
 
 
 
@@ -958,20 +885,25 @@ function prevStep() {
             <label hiden for="phone"></label>
             <section v-if="invalids.phone" class="text-red-500 text-sm">{{ invalids.phone }}
             </section>
-            <input v-model="fields.phone.value" id="phone" type="number" style="border-radius: 0.25rem!important"
-              class="border-slate-300 border rounded px-4 py-2 mb-3" placeholder="Telefon">
-            <p class="text-xs text-center text-slate-500 mb-10">Prin transmiterea datelor personale esti de acord cu <a
+            <input v-model="fields.phone.value" id="phone" type="number"
+              class="border-slate-300 border px-4 py-2 mb-3 !rounded-[0.375rem] !h-[3rem] !text-[1rem]"
+              placeholder="Telefon">
+            <p class="text-sm text-center text-slate-500 mb-10">Prin transmiterea datelor personale esti de acord cu <a
                 href="/politica-de-confidentialitate/" target="_blank">Politica de Confidențialitate</a> și <a
                 href="/termeni-si-conditii/" target="_blank">Termenii și
                 Condițiile</a> site-ului.</p>
 
 
 
-            <div class="flex justify-center">
+            <div class="flex flex-col justify-center items-center">
+              <!-- {{phoneReview}} -->
               <button @click.prevent="submit()" style="border-color:none !important; padding: 1rem 3.5rem !important;"
                 class="bg-green-600 whitespace-nowrap rounded-md text-white font-bold mt-4">Vreau sa fiu
                 contactat</button>
-              {{ fetchMessageError  }}
+              <span class="text-red-500"> {{ fetchMessageResult.message }}</span>
+              <!-- {{ fetchMessageResult.status }}
+              {{ fetchMessageResult }}
+              {{ isSubmitted }} -->
             </div>
 
           </div>
@@ -986,10 +918,10 @@ function prevStep() {
         <button v-if="!isLastStep" :disabled=!isPhoneModelFound
           class="bg-blue-100 px-12 py-[0.75rem] rounded-md border-[#e5e7eb]  text-blue-500 disabled:opacity-50 font-bold"
           @click.prevent="nextStep">
-          Next &gt;
+          Continua &gt;
         </button>
         <button v-if="!isFirstStep" class="text-neutral-500 border-[#fff]" @click.prevent="prevStep">
-          &lt; Previous
+          &lt; Inapoi
         </button>
       </footer>
 
@@ -997,23 +929,24 @@ function prevStep() {
 
     </form>
 
-    <section v-if="submitted" class="justify-center	text-center relative">
+    <section v-if="isSubmitted" class="justify-center	text-center relative">
       <h3 class="font-bold text-black text-4xl justify-self-center after:content-['🎉'] -mr-2 mb-4 mt-[6rem]">
         Felicitări!</h3>
-      {{ fetchMessageResult }}
-      {{ fetchMessageError }}
+      <!-- {{ fetchMessageResult }}
+      {{ fetchMessageError }} -->
 
 
       <p class="text-slate-600 font-bold	text-xl justify-self-center mb-8">Ai încheiat cu succes procesul de evaluare al
         telefonului tău.</p>
-      <p class="text-slate-400 text-lg">Vei fi contactat telefonic și prin email în cel mai scurt timp de echipa
+      <p class="text-slate-400 text-lg mb-0">Vei fi contactat telefonic și prin email în cel mai scurt timp de echipa
         noastră.</p>
-      <p class="text-slate-400 text-lg">În București poți veni în unul din <a
+      <p class="text-slate-400 text-lg mb-0">În București poți veni în unul din <a
           href="https://mobileexpert.ro/contact/">📍magazinele noastre</a> pentru o evaluare pe loc.</p>
 
-      <!-- <pre class="text-left text-white bg-blue-500 rounded p-3 mt-64 absolute">{{ customerData }}</pre>
-      <pre class="text-left text-white bg-blue-500  rounded p-3 mt-64 absolute right-10">{{ phoneReview }}</pre> -->
     </section>
+    <div v-if="isSubmitted" class="flex flex-col justify-start items-center mt-20">
+      <a href="/buy-back" class="px-14 py-4 rounded-md bg-blue-100 text-center text-md">Evalueaza încă un telefon ⟳</a>
+    </div>
 
     <!-- <pre>{{ fields }}</pre> -->
 

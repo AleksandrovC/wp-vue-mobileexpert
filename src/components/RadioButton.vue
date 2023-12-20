@@ -24,7 +24,7 @@ defineProps<{
       v-model="modelValue" />
     <label
       class="peer-checked:border-sky-500
-              peer-checked:bg-sky-100 hover:bg-sky-50/60 border-slate-300 border rounded-xl h-20 px-8 flex items-center cursor-pointer"
+              peer-checked:bg-sky-100 hover:bg-sky-50/60 border-slate-300 border rounded-xl min-h-[4.75rem] py-[0.25rem] px-8 flex items-center cursor-pointer"
       :for="radioBtnName">
       <slot></slot>
     </label>
